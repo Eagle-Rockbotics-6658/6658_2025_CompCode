@@ -1,4 +1,4 @@
-from rev import RelativeEncoder, CANSparkMax, CANSparkLowLevel
+from rev import RelativeEncoder, SparkMax, SparkLowLevel, SparkMaxConfig
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
@@ -11,20 +11,26 @@ from wpilib import RobotController
 class SwerveModule:
     
     def __init__(self, drivingCANId: int, turningCANId: int, encoderNum: int, reversedDrive: bool, reversedSteer: bool) -> None:
-        self.drivingSparkMax = CANSparkMax(drivingCANId, CANSparkLowLevel.MotorType.kBrushless)
-        self.turningSparkMax = CANSparkMax(turningCANId, CANSparkLowLevel.MotorType.kBrushless)
-        self.drivingSparkMax.restoreFactoryDefaults()
-        self.turningSparkMax.restoreFactoryDefaults()
+        
+        self.drivingSparkMax = SparkMax(drivingCANId, SparkLowLevel.MotorType.kBrushless)
+        
+        drivingMotorConfig = SparkMaxConfig()
+        drivingMotorConfig.encoder.positionConversionFactor(c.drivingPosFactor).velocityConversionFactor(c.drivingVelFactor)
+        drivingMotorConfig.setIdleMode(c.drivingIdleMode)
+        
+        
+        self.turningSparkMax = SparkMax(turningCANId, SparkLowLevel.MotorType.kBrushless)
+        
         self.drivingSparkMax.setInverted(reversedDrive)
         self.turningSparkMax.setInverted(reversedSteer)
+        
         self.drivingSparkMax.setIdleMode(c.drivingIdleMode)
         self.turningSparkMax.setIdleMode(c.turningIdleMode)
         self.drivingSparkMax.burnFlash()
         self.turningSparkMax.burnFlash()
         
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
-        self.drivingEncoder.setPositionConversionFactor(c.drivingPosFactor)
-        self.drivingEncoder.setVelocityConversionFactor(c.drivingVelFactor)
+        
         self.drivingEncoder.setPosition(0.0)
         self.drivingEncoder.setMeasurementPeriod(16)
         self.turningEncoder = CANcoder(encoderNum)

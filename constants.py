@@ -1,18 +1,18 @@
-from rev import CANSparkBase as CSB
+from rev import SparkMaxConfig
 from wpimath.units import inchesToMeters
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Translation2d
 from math import pi
 
 class SwerveModuleConstants():
-    turningP = 0.16
-    turningI = 0
-    turningD = 0.008
-    wheelDiameter = .09
     drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
-    turnEncoderMin = 0.0
-    turnEncoderMax = 2 * pi
+    drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
+    
+    drivingMotorConfig = SparkMaxConfig()
+    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor)
+    drivingMotorConfig.setIdleMode(drivingIdleMode)
+    
     drivingP = .04
     drivingI = 0
     drivingD = .008
@@ -21,7 +21,15 @@ class SwerveModuleConstants():
     drivingA = 0
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
-    drivingIdleMode = CSB.IdleMode.kBrake
+    
+    turningP = 0.16
+    turningI = 0
+    turningD = 0.008
+    wheelDiameter = .09
+
+    turnEncoderMin = 0.0
+    turnEncoderMax = 2 * pi
+    
     turningIdleMode = CSB.IdleMode.kBrake
     
 class DriveConstants():
