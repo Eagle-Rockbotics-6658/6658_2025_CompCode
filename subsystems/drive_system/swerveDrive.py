@@ -1,4 +1,4 @@
-from swerveModule import SwerveModule
+from subsystems.drive_system.swerveModule import SwerveModule
 from constants import DriveConstants as c
 from constants import PathPlannerConstants as p
 from phoenix6.hardware import Pigeon2
