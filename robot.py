@@ -44,8 +44,9 @@ class Robot(TimedCommandRobot):
         # create Camera object
         self.photonCamera = VisionCamera("ROCK")
         
-        # set periodic method to update ever .020 seconds
-        self.addPeriodic(self.photonCamera.periodic, .020)
+        # set periodic method to update ever .020 seconds. 
+        # Offset of .010 should make sure it updates before you need to do stuff with the information?
+        self.addPeriodic(self.photonCamera.periodic, .020, .010)
         
     def teleopPeriodic(self) -> None:
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
