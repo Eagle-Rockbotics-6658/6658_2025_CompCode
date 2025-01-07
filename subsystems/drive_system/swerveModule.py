@@ -1,4 +1,4 @@
-from rev import RelativeEncoder, SparkMax, SparkLowLevel, SparkMaxConfig
+from rev import SparkMax, SparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
@@ -12,36 +12,28 @@ class SwerveModule:
     
     def __init__(self, drivingCANId: int, turningCANId: int, encoderNum: int, reversedDrive: bool, reversedSteer: bool) -> None:
         
+        # set up driving motor and encoder
         self.drivingSparkMax = SparkMax(drivingCANId, SparkLowLevel.MotorType.kBrushless)
-        
-        drivingMotorConfig = SparkMaxConfig()
-        drivingMotorConfig.encoder.positionConversionFactor(c.drivingPosFactor).velocityConversionFactor(c.drivingVelFactor)
-        drivingMotorConfig.setIdleMode(c.drivingIdleMode)
-        
-        
-        self.turningSparkMax = SparkMax(turningCANId, SparkLowLevel.MotorType.kBrushless)
-        
+        self.drivingSparkMax.configure(c.drivingMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.drivingSparkMax.setInverted(reversedDrive)
-        self.turningSparkMax.setInverted(reversedSteer)
-        
-        self.drivingSparkMax.setIdleMode(c.drivingIdleMode)
-        self.turningSparkMax.setIdleMode(c.turningIdleMode)
-        self.drivingSparkMax.burnFlash()
-        self.turningSparkMax.burnFlash()
         
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
-        
         self.drivingEncoder.setPosition(0.0)
-        self.drivingEncoder.setMeasurementPeriod(16)
-        self.turningEncoder = CANcoder(encoderNum)
         
         self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
         self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
+        
+        
+        # set up turning motor and encoder
+        self.turningSparkMax = SparkMax(turningCANId, SparkLowLevel.MotorType.kBrushless)
+        self.turningSparkMax.configure(c.turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
+        self.turningSparkMax.setInverted(reversedSteer)
+        
+        self.turningEncoder = CANcoder(encoderNum)
+        
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
-        
-        # self.driveReversal = reversedDrive
-        
+                
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         sys_id_routine.motor("drive-motor").voltage(
             self.drivingSparkMax.get() * RobotController.getBatteryVoltage()

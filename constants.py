@@ -10,7 +10,7 @@ class SwerveModuleConstants():
     drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
     
     drivingMotorConfig = SparkMaxConfig()
-    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor)
+    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
     
     drivingP = .04
@@ -22,6 +22,12 @@ class SwerveModuleConstants():
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
+    
+    turningIdleMode = SparkMaxConfig.IdleMode.kBrake
+    
+    turningMotorConfig = SparkMaxConfig()
+    turningMotorConfig.setIdleMode(turningIdleMode)
+    
     turningP = 0.16
     turningI = 0
     turningD = 0.008
@@ -29,8 +35,6 @@ class SwerveModuleConstants():
 
     turnEncoderMin = 0.0
     turnEncoderMax = 2 * pi
-    
-    turningIdleMode = CSB.IdleMode.kBrake
     
 class DriveConstants():
     deadband = 0.07
