@@ -5,6 +5,8 @@ from wpimath.kinematics import ChassisSpeeds
 from constants import DriveConstants as d
 from math import copysign
 
+from subsystems.vision.visionCamera import VisionCamera
+
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 
@@ -16,7 +18,7 @@ import typing
 class Robot(TimedCommandRobot):
 
     autonomousCommand: typing.Optional[Command] = None
-
+    
     def getJoystickDeadband(self, axis: int) -> float:
         rawAxis = self.driveStick.getRawAxis(axis)
         if(abs(rawAxis) <= d.deadband):
@@ -38,6 +40,12 @@ class Robot(TimedCommandRobot):
         # self.autoChooser = AutoBuilder.buildAutoChooser("My Default Auto")
 
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
+        
+        # create Camera object
+        self.photonCamera = VisionCamera("ROCK")
+        
+        # set periodic method to update ever .020 seconds
+        self.addPeriodic(self.photonCamera.periodic, .020)
         
     def teleopPeriodic(self) -> None:
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))

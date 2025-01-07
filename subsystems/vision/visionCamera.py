@@ -14,10 +14,13 @@ class VisionCamera():
             self.camera,
             c.RobotToCam,
         )
+        self.resultsList = []
+        
+    def periodic(self):
+        self.resultsList = self.camera.getAllUnreadResults()
         
     def _getResults(self) -> (PhotonPipelineResult | None):
-        resultsList = self.camera.getAllUnreadResults()
-        if len(resultsList) > 0:
+        if len(self.resultsList) > 0:
             return self.camera.getAllUnreadResults()[-1]
     
     def getID(self, id_num: int) -> (PhotonTrackedTarget | None):
