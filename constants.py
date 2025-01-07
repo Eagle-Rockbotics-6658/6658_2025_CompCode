@@ -1,7 +1,7 @@
 from rev import SparkMaxConfig
 from wpimath.units import inchesToMeters
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Translation2d
+from wpimath.geometry import Translation2d, Transform3d, Translation3d, Rotation3d
 from math import pi
 
 class SwerveModuleConstants():
@@ -88,3 +88,9 @@ class PathPlannerConstants():
     rotationP = -2.00
     rotationI = 0
     rotationD = 0.05
+
+class PhotonVisionConstants():
+    RobotToCam = Transform3d(
+        Translation3d(0, 0, 0),
+        Rotation3d.fromDegrees(0, 0, 0)
+    )
