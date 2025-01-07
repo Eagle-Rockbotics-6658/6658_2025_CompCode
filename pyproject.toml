@@ -17,7 +17,6 @@ robotpy_extras = [
     # "cscore",
     "navx",
     "pathplannerlib",
-    "phoenix6",
     "rev",
     # "romi",
     # "sim",
@@ -25,4 +24,4 @@ robotpy_extras = [
 ]
 
 # Other pip packages to install
-requires = ["numpy"]
+requires = ["numpy", "phoenix6"]
