@@ -4,9 +4,10 @@ from constants import PathPlannerConstants as p
 from phoenix6.hardware import Pigeon2
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
-from wpimath.geometry import Rotation2d, Pose2d
+from wpimath.geometry import Rotation2d, Pose2d, Pose3d
 from ntcore import NetworkTableInstance
 from wpilib import DriverStation
+from photonlibpy.photonPoseEstimator import EstimatedRobotPose
 
 from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.controller import PPHolonomicDriveController
@@ -27,7 +28,6 @@ class SwerveDrive(metaclass=Singleton):
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
 
-        #
         self.lastDesiredSpeedFL = 0
         self.controlArray = []
         
@@ -84,6 +84,12 @@ class SwerveDrive(metaclass=Singleton):
             self.shouldFlipPath, # Supplier to control path flipping based on alliance color
             self # Reference to this subsystem to set requirements
         )
+    
+    def addVisionPoseEstimate(self, estimated_pose: EstimatedRobotPose) -> None:
+        """
+        Takes in EstimatedRobotPose to update odometry
+        """
+        self.odometry.addVisionMeasurement(estimated_pose.estimatedPose, estimated_pose.timestampSeconds)
         
     def shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
