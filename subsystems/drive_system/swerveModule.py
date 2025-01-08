@@ -55,17 +55,17 @@ class SwerveModule:
         return SwerveModulePosition(self.drivingEncoder.getPosition(),self.getCurrentRotation())
 
     def setDesiredState(self, desiredState: SwerveModuleState):
-        optimizedDesiredState = SwerveModuleState.optimize(desiredState, self.getCurrentRotation())
+        desiredState.optimize(self.getCurrentRotation)
         
         # turning
         self.turningSparkMax.set(
             -self.turningPIDController.calculate(
                 self.getCurrentRotation().radians(), 
-                optimizedDesiredState.angle.radians()
+                desiredState.angle.radians()
             )
         )
 
         self.drivingSparkMax.set(
-            self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
-            self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
+            self.drivingPIDController.calculate(self.getState().speed, desiredState.speed) + 
+            self.drivingFeedForwardController.calculate(desiredState.speed)
         )
