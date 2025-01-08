@@ -2,8 +2,10 @@ from rev import SparkMax, SparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
+from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
+from wpimath.units import volts
 from wpilib import RobotController
 from rev import SparkMaxConfig
 
@@ -32,14 +34,13 @@ class SwerveModule:
         # configure turning motor
         turningMotorConfig = SparkMaxConfig()
         turningMotorConfig.setIdleMode(c.turningIdleMode)
-        turningMotorConfig.closedLoop.pid(c.turningP, c.turningI, c.turningD).positionWrappingEnabled(True).positionWrappingInputRange(c.turnEncoderMin, c.turnEncoderMax)
         self.turningSparkMax.configure(turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.turningSparkMax.setInverted(reversedSteer)
-        # get turning encoder
+        # create turning encoder
         self.turningEncoder = CANcoder(encoderNum)
-        # get turning closed loop controller
-        self.turningClosedLoopController = self.turningSparkMax.getClosedLoopController()
-                        
+        # create turning PID Controller and enable continuous input
+        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD).enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
+                
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         sys_id_routine.motor("drive-motor").voltage(
             self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
@@ -62,5 +63,14 @@ class SwerveModule:
 
     def setDesiredState(self, desiredState: SwerveModuleState):
         desiredState.optimize(self.getCurrentRotation)
-        self.turningClosedLoopController.setReference(desiredState.angle.radians(), SparkMax.ControlType.kMAXMotionPositionControl)
+        
+        # turning
+        self.turningSparkMax.set(
+            -self.turningPIDController.calculate(
+                self.getCurrentRotation().radians(), 
+                desiredState.angle.radians()
+            )
+        )
+
+        # driving
         self.drivingClosedLoopController.setReference(desiredState.speed, SparkMax.ControlType.kMAXMotionVelocityControl)
