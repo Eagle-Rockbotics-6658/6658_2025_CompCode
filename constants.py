@@ -5,28 +5,26 @@ from wpimath.geometry import Translation2d
 from math import pi
 
 class SwerveModuleConstants():
+    
+    # drive motor settings
     drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    drivingMotorConfig = SparkMaxConfig()
-    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
-    drivingMotorConfig.setIdleMode(drivingIdleMode)
-    
     drivingP = .04
     drivingI = 0
     drivingD = .008
-    drivingS = 0
+    # drivingS = 0
     drivingV = 6.102634556313851
-    drivingA = 0
+    # drivingA = 0
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
+    drivingEncoderMeasurementPeriod = 16
     
+    
+    # turning motor settings
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
-    
-    turningMotorConfig = SparkMaxConfig()
-    turningMotorConfig.setIdleMode(turningIdleMode)
     
     turningP = 0.16
     turningI = 0

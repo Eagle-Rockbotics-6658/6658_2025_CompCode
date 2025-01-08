@@ -2,38 +2,45 @@ from rev import SparkMax, SparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.units import volts
 from wpilib import RobotController
+from rev import SparkMaxConfig
+
 
 class SwerveModule:
     
     def __init__(self, drivingCANId: int, turningCANId: int, encoderNum: int, reversedDrive: bool, reversedSteer: bool) -> None:
         
-        # set up driving motor and encoder
+        # create driving motor
         self.drivingSparkMax = SparkMax(drivingCANId, SparkLowLevel.MotorType.kBrushless)
-        self.drivingSparkMax.configure(c.drivingMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
+        # configure driving motor
+        drivingMotorConfig = SparkMaxConfig()
+        drivingMotorConfig.encoder.positionConversionFactor(c.drivingPosFactor).velocityConversionFactor(c.drivingVelFactor).uvwMeasurementPeriod(c.drivingEncoderMeasurementPeriod)
+        drivingMotorConfig.setIdleMode(c.drivingIdleMode)
+        drivingMotorConfig.closedLoop.outputRange(c.drivingMinOutput, c.drivingMaxOutput).pidf(c.drivingP, c.drivingI, c.drivingD, 1/c.drivingV)
+        self.drivingSparkMax.configure(drivingMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.drivingSparkMax.setInverted(reversedDrive)
-        
+        # get driving encoder
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
         self.drivingEncoder.setPosition(0.0)
+        # get driving closed loop controller
+        self.drivingClosedLoopController = self.drivingSparkMax.getClosedLoopController()
         
-        self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
-        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
-        
-        
-        # set up turning motor and encoder
+        # set up turning motor
         self.turningSparkMax = SparkMax(turningCANId, SparkLowLevel.MotorType.kBrushless)
-        self.turningSparkMax.configure(c.turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
+        # configure turning motor
+        turningMotorConfig = SparkMaxConfig()
+        turningMotorConfig.setIdleMode(c.turningIdleMode)
+        turningMotorConfig.closedLoop.pid(c.turningP, c.turningI, c.turningD).positionWrappingEnabled(True).positionWrappingInputRange(c.turnEncoderMin, c.turnEncoderMax)
+        self.turningSparkMax.configure(turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.turningSparkMax.setInverted(reversedSteer)
-        
+        # get turning encoder
         self.turningEncoder = CANcoder(encoderNum)
-        
-        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
-        self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
-                
+        # get turning closed loop controller
+        self.turningClosedLoopController = self.turningSparkMax.getClosedLoopController()
+                        
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         sys_id_routine.motor("drive-motor").voltage(
             self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
@@ -55,17 +62,6 @@ class SwerveModule:
         return SwerveModulePosition(self.drivingEncoder.getPosition(),self.getCurrentRotation())
 
     def setDesiredState(self, desiredState: SwerveModuleState):
-        optimizedDesiredState = SwerveModuleState.optimize(desiredState, self.getCurrentRotation())
-        
-        # turning
-        self.turningSparkMax.set(
-            -self.turningPIDController.calculate(
-                self.getCurrentRotation().radians(), 
-                optimizedDesiredState.angle.radians()
-            )
-        )
-
-        self.drivingSparkMax.set(
-            self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
-            self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
-        )
+        desiredState.optimize(self.getCurrentRotation)
+        self.turningClosedLoopController.setReference(desiredState.angle.radians(), SparkMax.ControlType.kMAXMotionPositionControl)
+        self.drivingClosedLoopController.setReference(desiredState.speed, SparkMax.ControlType.kMAXMotionVelocityControl)
