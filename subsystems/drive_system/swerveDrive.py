@@ -9,8 +9,8 @@ from ntcore import NetworkTableInstance
 from wpilib import DriverStation
 
 from pathplannerlib.auto import AutoBuilder
-# from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.config import HolonomicPathFollowerConfig, PIDConstants, ReplanningConfig
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.config import PIDConstants, RobotConfig
 
 class Singleton(type):
     _instances = {}
@@ -49,40 +49,22 @@ class SwerveDrive(metaclass=Singleton):
             Pose2d()
         )
         
-        # # Load the RobotConfig from the GUI settings. You should probably
-        # # store this in your Constants file
-        # config = RobotConfig.fromGUISettings()
+        # Load the RobotConfig from the GUI settings. You should probably
+        # store this in your Constants file
+        config = RobotConfig.fromGUISettings()
 
-        # # Configure the AutoBuilder last
-        # AutoBuilder.configureHolonomic(
-        #     self.getPose, # Robot pose supplier
-        #     self.resetPose, # Method to reset odometry (will be called if your auto has a starting pose)
-        #     self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        #     lambda speeds, feedforwards: self.driveRobotRelative(speeds), # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
-        #     PPHolonomicDriveController( # PPHolonomicController is the built in path following controller for holonomic drive trains
-        #         PIDConstants(5.0, 0.0, 0.0), # Translation PID constants
-        #         PIDConstants(5.0, 0.0, 0.0) # Rotation PID constants
-        #     ),
-        #     config, # The robot configuration
-        #     self.shouldFlipPath, # Supplier to control path flipping based on alliance color
-        #     self # Reference to this subsystem to set requirements
-        # )
-        
-        # Configure the AutoBuilder last
-        AutoBuilder.configureHolonomic(
-            self.getPose, # Robot pose supplier
-            self.resetPose, # Method to reset odometry (will be called if your auto has a starting pose)
-            self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
-            HolonomicPathFollowerConfig( # PPHolonomicController is the built in path following controller for holonomic drive trains
-                PIDConstants(p.translationP, p.translationI, p.translationD), # Translation PID constants
-                PIDConstants(p.rotationP, p.rotationI, p.rotationD), # Rotation PID constants
-                1.0,
-                1.0,
-                ReplanningConfig()
+        AutoBuilder.configure(
+            self.getPose,
+            self.resetPose,
+            self.getRobotRelativeSpeeds,
+            lambda speeds, feedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicDriveController(
+                PIDConstants(p.translationP, p.translationI, p.translationD),
+                PIDConstants(p.rotationP, p.rotationI, p.rotationD)
             ),
-            self.shouldFlipPath, # Supplier to control path flipping based on alliance color
-            self # Reference to this subsystem to set requirements
+            config,
+            self.shouldFlipPath,
+            self
         )
         
     def shouldFlipPath(self):
