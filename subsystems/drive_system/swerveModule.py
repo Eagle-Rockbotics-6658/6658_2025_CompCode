@@ -2,10 +2,9 @@ from rev import SparkMax, SparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
+from wpimath.controller import PIDController
 from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.units import volts
 from wpilib import RobotController
 from rev import SparkMaxConfig
 
