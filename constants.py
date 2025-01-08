@@ -14,9 +14,7 @@ class SwerveModuleConstants():
     drivingP = .04
     drivingI = 0
     drivingD = .008
-    # drivingS = 0
     drivingV = 6.102634556313851
-    # drivingA = 0
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
