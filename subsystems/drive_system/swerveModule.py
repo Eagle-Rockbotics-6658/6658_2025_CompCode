@@ -39,7 +39,8 @@ class SwerveModule:
         # create turning encoder
         self.turningEncoder = CANcoder(encoderNum)
         # create turning PID Controller and enable continuous input
-        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD).enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
+        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
+        self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         sys_id_routine.motor("drive-motor").voltage(
