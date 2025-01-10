@@ -42,6 +42,9 @@ class SwerveModule:
         )
         
     def getCurrentRotation(self) -> Rotation2d:
+        """
+        Get current rotation of the module
+        """
         return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
     
     def resetEncoders(self):
@@ -49,13 +52,26 @@ class SwerveModule:
         self.turningEncoder.set_position(0.0)
                 
     def getState(self) -> SwerveModuleState:
+        """
+        Get current state of the module
+        """
         return SwerveModuleState(self.drivingEncoder.getVelocity(), self.getCurrentRotation())
         
     def getPosition(self) -> SwerveModulePosition:
+        """
+        Get current position of the module
+        
+        :return: The current position of the module
+        """
         return SwerveModulePosition(self.drivingEncoder.getPosition(),self.getCurrentRotation())
 
-    def setDesiredState(self, desiredState: SwerveModuleState):
-        desiredState.optimize(self.getCurrentRotation)
+    def setDesiredState(self, desiredState: SwerveModuleState) -> None:
+        """
+        Sets the state of the module
+        
+        :param desiredState: The desired state of the module
+        """
+        desiredState.optimize(self.getCurrentRotation())
         
         # turning
         self.turningSparkMax.set(
