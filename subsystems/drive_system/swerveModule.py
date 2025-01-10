@@ -14,12 +14,12 @@ class SwerveModule:
     
     **Parameters**:
         `drivingCANId`: The CAN ID of the driving motor
-        'turningCANId': The CAN ID of the turning motor
-        'encoderNum': The CAN ID of the encoder
-        'reversedDrive': Whether the driving motor is reversed
-        'reversedSteer': Whether the turning motor is reversed
+        `turningCANId`: The CAN ID of the turning motor
+        `encoderNum`: The CAN ID of the encoder
+        `reversedDrive`: Whether the driving motor is reversed
+        `reversedSteer`: Whether the turning motor is reversed
     
-    Methods:
+    **Methods**:
     - `getCurrentRotation` - Get current rotation of the module
     - `resetEncoders` - Resets the rotation and driving encoders to 0
     - `getState` - Get current state of the module
@@ -53,8 +53,8 @@ class SwerveModule:
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         """_summary_
 
-        Args:
-            sys_id_routine (SysIdRoutineLog): _description_
+        **Args**:
+            `sys_id_routine` (SysIdRoutineLog): _description_
         """
         sys_id_routine.motor("drive-motor").voltage(
             self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
@@ -65,8 +65,8 @@ class SwerveModule:
     def getCurrentRotation(self) -> Rotation2d:
         """Gets the current rotation of the module
 
-        Returns:
-            Rotation2d: Rotation of the module
+        **Returns**:
+            `Rotation2d`: Rotation of the module
         """
         return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
     
@@ -78,8 +78,8 @@ class SwerveModule:
     def getState(self) -> SwerveModuleState:
         """Get current state of the module
         
-        Returns:
-            SwerveModuleState: The current state of the module
+        **Returns**:
+            `SwerveModuleState`: The current state of the module
         """
         return SwerveModuleState(self.drivingEncoder.getVelocity(), self.getCurrentRotation())
         
@@ -87,15 +87,15 @@ class SwerveModule:
         """
         Get current position of the module
         
-        Returns:
-            SwerveModulePosition: The current position of the module
+        **Returns**:
+            `SwerveModulePosition`: The current position of the module
         """
         return SwerveModulePosition(self.drivingEncoder.getPosition(),self.getCurrentRotation())
 
     def setDesiredState(self, desiredState: SwerveModuleState) -> None:
         """Sets the state of the module
 
-        Args:
+        **Args**:
             `desiredState` (SwerveModuleState): The desired state of the module
         """
         desiredState.optimize(self.getCurrentRotation())
