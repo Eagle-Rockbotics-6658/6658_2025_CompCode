@@ -79,7 +79,7 @@ class SwerveDrive(metaclass=Singleton):
                 PIDConstants(p.rotationP, p.rotationI, p.rotationD)
             ),
             config,
-            self.shouldFlipPath,
+            self._shouldFlipPath,
             self
         )
         
