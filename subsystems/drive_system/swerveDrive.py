@@ -20,7 +20,23 @@ class Singleton(type):
         return cls._instances[cls]
 
 class SwerveDrive(metaclass=Singleton):
+    r"""
+    Class for controlling a single swerve module
     
+    **Methods**:
+    - `getHeading` - Get the heading of the robot
+    - `getModuleStates` - Get the state of each module
+    - `getModulePositions` - Get the position of each module
+    - `zeroHeading` - Zero the heading of the robot
+    - `resetPose` - Reset the estimated position of the robot on the field
+    - `getPose` - Get the estimated position of the robot on the field
+    - `getRobotRelativeSpeeds` - Get the robot relative ChassisSpeeds of the robot
+    - `resetEncoders` - Reset the encoders of all the modules
+    - `setModuleStates` - Set the desired states of the swerve modules
+    - `driveFieldRelative` - Drive the robot using field relative speeds
+    - `driveRobotRelative` - Drive the robot using robot relative speeds
+    - `setX` - Set modules into an X configuration to prevent movement
+    """
     def __init__(self) -> None:
         self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, True, False)
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
@@ -35,7 +51,7 @@ class SwerveDrive(metaclass=Singleton):
         
         self.gyro = Pigeon2(c.PigeonGyro)
         
-        self.publishStates()
+        self._publishStates()
                 
         self.odometry = SwerveDrive4PoseEstimator(
             c.kinematics,
@@ -67,48 +83,86 @@ class SwerveDrive(metaclass=Singleton):
             self
         )
         
-    def shouldFlipPath(self):
+    def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
         # This will flip the path being followed to the red side of the field.
         # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
         return DriverStation.getAlliance() == DriverStation.Alliance.kRed
         
-    def publishStates(self):
+    def _publishStates(self) -> None:
+        """Publishes the estimated robot state to the driverstation"""
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
         self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish()
 
-    def updateStates(self):
+    def _updateStates(self) -> None:
         self.RedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
         
     def getHeading(self) -> Rotation2d:
+        """Gets the heading of the robot
+
+        **Returns**:
+            `Rotation2d`: The heading of the robot
+        """
         return Rotation2d.fromDegrees(self.gyro.get_yaw().value_as_double)
     
     def getModuleStates(self) -> list[SwerveModuleState]:
+        """Gets a list containing the state of each module
+
+        **Returns**:
+            `list[SwerveModuleState]`: A list containing the state of each module
+        """
         return [self.moduleFL.getState(), self.moduleFR.getState(), self.moduleRL.getState(), self.moduleRR.getState()]
     
     def getModulePositions(self) -> list[SwerveModulePosition]:
+        """Gets a list containing the position of each module
+
+        **Returns**:
+            `list[SwerveModulePosition]`: A list containing the position of each module
+        """
         return [self.moduleFL.getPosition(), self.moduleFR.getPosition(), self.moduleRL.getPosition(), self.moduleRR.getPosition()]
     
-    def zeroHeading(self):
+    def zeroHeading(self) -> None:
+        """Zeros the heading of the robot provided by the gyroscope"""
         self.gyro.set_yaw(0)
         
-    def resetPose(self, pose = Pose2d()):
+    def resetPose(self, pose: Pose2d = Pose2d()) -> None:
+        """Resets the estimated position of the robot on the field to the specified pose, the position is (0, 0) if no argument is given
+
+        **Args**:
+            `pose` (Pose2d, optional): The position to set the robot odometry to. Defaults to Pose2d().
+        """
         self.odometry.resetPosition(self.getHeading(), self.getModulePositions(), pose)
         
     def getPose(self) -> Pose2d:
+        """Gets the position of the robot on the field
+
+        **Returns**:
+            `Pose2d`: The estimated position of the robot on the field
+        """
         return self.odometry.getEstimatedPosition()
     
     def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
+        """Gets the robot relative ChassisSpeeds of the robot
+
+        **Returns**:
+            `ChassisSpeeds`: The robot relative ChassisSpeeds of the robot
+        """
         return c.kinematics.toChassisSpeeds(self.getModuleStates())
         
-    def resetEncoders(self):
+    def resetEncoders(self) -> None:
+        """Resets the encoders of all the modules"""
         self.moduleFL.resetEncoders()
         self.moduleFR.resetEncoders()
         self.moduleRL.resetEncoders()
         self.moduleRR.resetEncoders()
         
-    def setModuleStates(self, desiredStates: tuple[SwerveModuleState]):
+    def setModuleStates(self, desiredStates: tuple[SwerveModuleState]) -> None:
+        """Sets the desired states of the swerve modules
+
+        **Args**:
+            `desiredStates` (tuple[SwerveModuleState]): a 4 tuple containing the SwerveModuleState for each module
+        """
         desiredStates = c.kinematics.desaturateWheelSpeeds(desiredStates, c.MaxSpeed)
         self.moduleFL.setDesiredState(desiredStates[0])
         self.moduleFR.setDesiredState(desiredStates[1])
@@ -123,21 +177,32 @@ class SwerveDrive(metaclass=Singleton):
                 self.moduleRR.getPosition()
             )
         )
-        self.updateStates()
+        self._updateStates()
         if len(self.controlArray) <= 100000:
             self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
         
-    def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds):
+    def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
+        """Drives the robot using field relative speeds
+        
+        **Args**:
+            `chassisSpeeds` (ChassisSpeeds): The ChassisSpeeds containing the direction to drive relative to the field
+        """
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
         self.setModuleStates(moduleStates)
         
-    def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds):
+    def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
+        """Drives the robot using robot relative speeds
+        
+        **Args**:
+            `chassisSpeeds` (ChassisSpeeds): The ChassisSpeeds containing the direction to drive relative to the robot
+        """
         moduleStates = c.kinematics.toSwerveModuleStates(chassisSpeeds)
         self.setModuleStates(moduleStates)
         
-    def setX(self):
+    def setX(self) -> None:
+        """Sets modules into an X configuration to prevent movement"""
         self.moduleFL.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(45)))
         self.moduleFR.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
         self.moduleRL.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
