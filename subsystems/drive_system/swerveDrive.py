@@ -16,15 +16,10 @@ from pathplannerlib.path import PathConstraints
 from wpimath.units import degreesToRadians
 from commands2.command import Command
 
+from commands2 import Subsystem
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
-class SwerveDrive(metaclass=Singleton):
+class SwerveDrive(Subsystem):
     r"""
     Class for controlling a single swerve module
     
@@ -198,7 +193,7 @@ class SwerveDrive(metaclass=Singleton):
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
         self.setModuleStates(moduleStates)
-        
+            
     def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using robot relative speeds
         
@@ -220,5 +215,5 @@ class SwerveDrive(metaclass=Singleton):
             targetPose,
             self.pathFindingConstraints,
             goal_end_vel=0.0, # Goal end velocity in meters/sec
-            rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+            # rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
         )
