@@ -75,8 +75,8 @@ class SwerveDrive(metaclass=Singleton):
             self.getRobotRelativeSpeeds,
             lambda speeds, feedforwards: self.driveRobotRelative(speeds),
             PPHolonomicDriveController(
-                PIDConstants(p.translationP, p.translationI, p.translationD),
-                PIDConstants(p.rotationP, p.rotationI, p.rotationD)
+                PIDConstants(*p.translationPID),
+                PIDConstants(*p.rotationPID)
             ),
             config,
             self._shouldFlipPath,
