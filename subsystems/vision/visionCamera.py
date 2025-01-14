@@ -17,6 +17,7 @@ class VisionCamera():
         self.resultsList = []
         
     def periodic(self):
+        """Function that needs to be run periodically"""
         self.resultsList = self.camera.getAllUnreadResults()
         
     def _getResults(self) -> (PhotonPipelineResult | None):
@@ -24,8 +25,13 @@ class VisionCamera():
             return self.camera.getAllUnreadResults()[-1]
     
     def getID(self, id_num: int) -> (PhotonTrackedTarget | None):
-        """
-        Returns the PhotonTrackedTarget of the requested id, or None if id isn't found
+        """Returns information on the requested apriltag, or None if id isn't found
+
+        **Args**:
+            `id_num` (int): The id number of the requested apriltag
+
+        Returns:
+            `(PhotonTrackedTarget | None)`: The `PhotonTrackedTarget` if the requested id is found, otherwise None
         """
         results = self._getResults()
         if results is not None:
@@ -35,4 +41,9 @@ class VisionCamera():
         return None
     
     def getEstimatedPose(self) -> (EstimatedRobotPose | None):
+        """Gets the estimated pose of the robot
+
+        Returns:
+            `(EstimatedRobotPose | None)`: The `EstimatedRobotPose` of the robot, returns `None` if no targets are found
+        """
         return self.camPoseEst.update()
