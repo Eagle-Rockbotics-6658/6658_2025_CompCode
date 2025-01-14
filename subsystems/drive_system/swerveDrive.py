@@ -12,6 +12,11 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants, RobotConfig
 
+from pathplannerlib.path import PathConstraints
+from wpimath.units import degreesToRadians
+from commands2.command import Command
+
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -82,6 +87,8 @@ class SwerveDrive(metaclass=Singleton):
             self._shouldFlipPath,
             self
         )
+        
+        self.pathFindingConstraints = PathConstraints(3.0, 5.0, degreesToRadians(540), degreesToRadians(720))
         
     def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -207,4 +214,11 @@ class SwerveDrive(metaclass=Singleton):
         self.moduleFR.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
         self.moduleRL.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
         self.moduleRR.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(45)))
-        
+    
+    def pathFindToPose(self, targetPose: Pose2d) -> Command:
+        return AutoBuilder.pathfindToPose(
+            targetPose,
+            self.pathFindingConstraints,
+            goal_end_vel=0.0, # Goal end velocity in meters/sec
+            rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+        )
