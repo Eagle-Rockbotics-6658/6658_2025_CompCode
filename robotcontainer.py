@@ -7,7 +7,7 @@ from wpilib import Joystick, SmartDashboard
 from pathplannerlib.auto import AutoBuilder
 
 from commands2.button import JoystickButton
-from commands2 import RunCommand, FunctionalCommand, Command
+from commands2 import RunCommand, Command
 from commands2.cmd import runOnce
 
 from math import copysign
