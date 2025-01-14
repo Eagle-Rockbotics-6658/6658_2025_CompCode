@@ -94,3 +94,5 @@ class PhotonVisionConstants():
         Translation3d(0, 0, 0),
         Rotation3d.fromDegrees(0, 0, 0)
     )
+    
+    RobotToTagCenteringPID = (1, 0, 0)

@@ -49,7 +49,10 @@ class Robot(TimedCommandRobot):
         self.addPeriodic(self.photonCamera.periodic, .020, .010)
         
     def teleopPeriodic(self) -> None:
-        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
+        if self.driveStick.getRawButtonPressed(4):
+            self.drive.driveRobotRelative(self.photonCamera.centerRobotOnTag(2))
+        else:
+            self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
         
