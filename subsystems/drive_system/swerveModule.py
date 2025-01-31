@@ -36,8 +36,8 @@ class SwerveModule:
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
         self.drivingEncoder.setPosition(0.0)
         
-        self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
-        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
+        self.drivingPIDController = PIDController(*c.drivingPID)
+        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(*c.drivingSVA)
         
         
         # set up turning motor and encoder
@@ -47,7 +47,7 @@ class SwerveModule:
         
         self.turningEncoder = CANcoder(encoderNum)
         
-        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
+        self.turningPIDController = PIDController(*c.turningPID)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:

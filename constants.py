@@ -13,12 +13,8 @@ class SwerveModuleConstants():
     drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
     
-    drivingP = .04
-    drivingI = 0
-    drivingD = .008
-    drivingS = 0
-    drivingV = 6.102634556313851
-    drivingA = 0
+    drivingPID = (.04, 0, .008)
+    drivingSVA = (0, 6.102634556313851, 0)
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
@@ -28,9 +24,7 @@ class SwerveModuleConstants():
     turningMotorConfig = SparkMaxConfig()
     turningMotorConfig.setIdleMode(turningIdleMode)
     
-    turningP = 0.16
-    turningI = 0
-    turningD = 0.008
+    turningPID = (0.16, 0, 0.008)
     wheelDiameter = .09
 
     turnEncoderMin = 0.0
@@ -81,13 +75,8 @@ class robotConstants():
     joystickID = 0
 
 class PathPlannerConstants():
-    translationP = 2.00
-    translationI = 0
-    translationD = -0.1
-
-    rotationP = -2.00
-    rotationI = 0
-    rotationD = 0.05
+    translationPID = (2.00, 0, -0.1)
+    rotationPID = (-2.00, 0, 0.05)
 
 class PhotonVisionConstants():
     RobotToCam = Transform3d(
