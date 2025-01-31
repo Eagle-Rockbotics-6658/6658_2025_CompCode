@@ -12,6 +12,8 @@ from commands2.command import Command
 from commands2 import TimedCommandRobot
 import typing
 
+from wpimath.geometry import Pose2d
+
 
 class Robot(TimedCommandRobot):
 
@@ -40,7 +42,10 @@ class Robot(TimedCommandRobot):
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
     def teleopPeriodic(self) -> None:
-        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
+        if self.driveStick.getRawButton(5):
+            self.drive.pathFindToPose(Pose2d(0, 0, 0)).schedule()
+        else:
+            self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
         

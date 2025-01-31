@@ -35,7 +35,7 @@ class SwerveModule:
         drivingMotorConfig = SparkMaxConfig()
         drivingMotorConfig.encoder.positionConversionFactor(c.drivingPosFactor).velocityConversionFactor(c.drivingVelFactor).uvwMeasurementPeriod(c.drivingEncoderMeasurementPeriod)
         drivingMotorConfig.setIdleMode(c.drivingIdleMode)
-        drivingMotorConfig.closedLoop.outputRange(c.drivingMinOutput, c.drivingMaxOutput).pidf(c.drivingP, c.drivingI, c.drivingD, 1/c.drivingV)
+        drivingMotorConfig.closedLoop.outputRange(c.drivingMinOutput, c.drivingMaxOutput).pidf(*c.drivingPIDF)
         self.drivingSparkMax.configure(drivingMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.drivingSparkMax.setInverted(reversedDrive)
         # get driving encoder
@@ -53,8 +53,9 @@ class SwerveModule:
         self.turningSparkMax.setInverted(reversedSteer)
         # create turning encoder
         self.turningEncoder = CANcoder(encoderNum)
+        
         # create turning PID Controller and enable continuous input
-        self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
+        self.turningPIDController = PIDController(*c.turningPID)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:

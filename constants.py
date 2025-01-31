@@ -11,10 +11,9 @@ class SwerveModuleConstants():
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    drivingP = .04
-    drivingI = 0
-    drivingD = .008
-    drivingV = 6.102634556313851
+    # drivingPID = (.04, 0, .008)
+    # drivingSVA = (0, 6.102634556313851, 0)
+    drivingPIDF = (.04, 0, .008, 6.102634556313851)
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
@@ -24,9 +23,10 @@ class SwerveModuleConstants():
     # turning motor settings
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    turningP = 0.16
-    turningI = 0
-    turningD = 0.008
+    turningMotorConfig = SparkMaxConfig()
+    turningMotorConfig.setIdleMode(turningIdleMode)
+    
+    turningPID = (0.16, 0, 0.008)
     wheelDiameter = .09
 
     turnEncoderMin = 0.0
@@ -77,10 +77,6 @@ class robotConstants():
     joystickID = 0
 
 class PathPlannerConstants():
-    translationP = 2.00
-    translationI = 0
-    translationD = -0.1
+    translationPID = (2.00, 0, -0.1)
 
-    rotationP = -2.00
-    rotationI = 0
-    rotationD = 0.05
+    rotationPID = (-2.00, 0, 0.05)
