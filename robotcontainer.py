@@ -35,7 +35,7 @@ class RobotContainer:
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
-        JoystickButton(self.driveStick, 4).whileTrue(run(lambda: self.drive.pathFindToPose(Pose2d(0, 0, 0)), self.drive))
+        # JoystickButton(self.driveStick, 4).whileTrue(run(lambda: self.drive.pathFindToPose(Pose2d(0, 0, 0)), self.drive))
     
     def getJoystickDeadband(self, axis: int) -> float:
         rawAxis = self.driveStick.getRawAxis(axis)
