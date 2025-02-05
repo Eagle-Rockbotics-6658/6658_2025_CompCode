@@ -5,7 +5,6 @@ from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.units import volts
 from wpilib import RobotController
 
 class SwerveModule:
@@ -108,6 +107,7 @@ class SwerveModule:
             )
         )
 
+        # self.drivingSparkMax.set(0)
         self.drivingSparkMax.set(
             self.drivingPIDController.calculate(self.getState().speed, desiredState.speed) + 
             self.drivingFeedForwardController.calculate(desiredState.speed)
