@@ -6,7 +6,9 @@ from constants import PhotonVisionConstants as c
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.controller import PIDController
 
-class VisionCamera():
+from commands2 import Subsystem
+
+class VisionCamera(Subsystem):
     
     def __init__(self, camera_name: str):
         self.camera = PhotonCamera(camera_name)
@@ -19,7 +21,7 @@ class VisionCamera():
         self.resultsList = []
         
         self.robotToTagCenteringPIDController = PIDController(*c.RobotToTagCenteringPID)
-        
+                        
     def periodic(self):
         """Function that needs to be run periodically"""
         self.resultsList = self.camera.getAllUnreadResults()
