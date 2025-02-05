@@ -1,4 +1,5 @@
 from subsystems.drive_system.swerveDrive import SwerveDrive
+from subsystems.vision.visionCamera import VisionCamera
 
 from constants import DriveConstants as d
 from constants import robotConstants as c
@@ -20,6 +21,9 @@ class RobotContainer:
     def __init__(self):
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
+        
+        self.limeLight = VisionCamera("Rock")
+        self.limeLight.register()
 
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
