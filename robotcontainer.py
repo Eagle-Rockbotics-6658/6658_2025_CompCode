@@ -13,7 +13,6 @@ from commands2.cmd import runOnce, run
 from math import copysign
 
 from wpimath.kinematics import ChassisSpeeds
-from wpimath.geometry import Pose2d
 
 
 class RobotContainer:

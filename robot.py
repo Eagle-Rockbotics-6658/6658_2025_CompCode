@@ -1,6 +1,3 @@
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.path import PathPlannerPath
-
 from commands2.command import Command
 from commands2 import TimedCommandRobot, CommandScheduler
 import typing
