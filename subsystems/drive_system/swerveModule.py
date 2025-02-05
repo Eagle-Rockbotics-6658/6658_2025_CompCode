@@ -4,8 +4,6 @@ from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController
 from constants import SwerveModuleConstants as c
-from wpilib.sysid import SysIdRoutineLog
-from wpilib import RobotController
 from rev import SparkMaxConfig
 
 
