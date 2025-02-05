@@ -58,17 +58,17 @@ class SwerveModule:
         self.turningPIDController = PIDController(*c.turningPID)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
-    def log(self, sys_id_routine: SysIdRoutineLog) -> None:
-        """_summary_
+    # def log(self, sys_id_routine: SysIdRoutineLog) -> None:
+    #     """_summary_
 
-        **Args**:
-            `sys_id_routine` (SysIdRoutineLog): _description_
-        """
-        sys_id_routine.motor("drive-motor").voltage(
-            self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
-        ).position(self.getPosition().distance).velocity(
-            self.getState().speed
-        )
+    #     **Args**:
+    #         `sys_id_routine` (SysIdRoutineLog): _description_
+    #     """
+    #     sys_id_routine.motor("drive-motor").voltage(
+    #         self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
+    #     ).position(self.getPosition().distance).velocity(
+    #         self.getState().speed
+    #     )
         
     def getCurrentRotation(self) -> Rotation2d:
         """Gets the current rotation of the module
