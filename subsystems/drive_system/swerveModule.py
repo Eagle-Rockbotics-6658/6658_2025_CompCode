@@ -116,3 +116,23 @@ class SwerveModule:
 
         # driving
         self.drivingClosedLoopController.setReference(desiredState.speed, SparkMax.ControlType.kMAXMotionVelocityControl)
+
+    def voltageControl(self, desiredState: SwerveModuleState) -> tuple[float]:
+        """Sets the state of the module, but uses voltage control for driving
+
+        **Args**:
+            `desiredState` (SwerveModuleState): The desiredState of the module
+        
+        **Returns**:
+            `(voltage: float, velocity: float)`: The current voltage and velocity of the module
+        """
+        desiredState.optimize(self.getCurrentRotation())
+        self.turningSparkMax.set(
+            -self.turningPIDController.calculate(
+                self.getCurrentRotation().radians(), 
+                desiredState.angle.radians()
+            )
+        )
+        self.drivingSparkMax.setVoltage(desiredState.speed)
+        
+        return (desiredState.speed, self.turningEncoder.get_velocity())

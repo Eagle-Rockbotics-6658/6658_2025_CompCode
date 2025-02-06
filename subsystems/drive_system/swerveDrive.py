@@ -18,6 +18,9 @@ from commands2.command import Command
 
 from commands2 import Subsystem
 
+from wpiutil.log import DataLog, DoubleLogEntry
+from wpilib import Timer
+
 
 class SwerveDrive(Subsystem):
     r"""
@@ -219,3 +222,21 @@ class SwerveDrive(Subsystem):
             goal_end_vel=0.0, # Goal end velocity in meters/sec
             # rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
         )
+
+    def voltageControl(self, voltage: float):
+        """Controls all modules based on voltage and returns a tuple
+
+        Args:
+            voltage (float): the voltage to set the modules to
+
+        Returns:
+            (average voltage, average velocity): Average voltage and average velocity for all four motors
+        """
+        moduleStates = c.kinematics.toSwerveModuleStates(ChassisSpeeds(0, voltage))
+        voltageList = []
+        velocityList = []
+        voltageList[:0], velocityList[:0] = tuple(zip(self.moduleFL.voltageControl(moduleStates[0])))
+        voltageList[:0], velocityList[:0] = tuple(zip(self.moduleFR.voltageControl(moduleStates[1])))
+        voltageList[:0], velocityList[:0] = tuple(zip(self.moduleRL.voltageControl(moduleStates[2])))
+        voltageList[:0], velocityList[:0] = tuple(zip(self.moduleRR.voltageControl(moduleStates[3])))
+        return (sum(voltageList)/4, sum(velocityList)/4)

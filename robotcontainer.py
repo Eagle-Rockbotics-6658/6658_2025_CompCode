@@ -8,11 +8,16 @@ from pathplannerlib.auto import AutoBuilder
 
 from commands2.button import JoystickButton
 from commands2 import Command
-from commands2.cmd import runOnce, run
+from commands2.cmd import runOnce, run, sequence
 
 from math import copysign
 
 from wpimath.kinematics import ChassisSpeeds
+
+from commands.driveIdRoutines import QuasitasticRoutine, DynamicRoutine
+
+from wpiutil.log import DoubleArrayLogEntry, DataLog
+from wpilib import DataLogManager
 
 
 class RobotContainer:
@@ -31,6 +36,14 @@ class RobotContainer:
         self.configureButtonBindings()
         self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2)), self.drive))
         
+        DataLogManager.start()
+        
+        log = DataLogManager.getLog()
+        self.quasitasticForwardLog = DoubleArrayLogEntry(log, "/SysId/quasitasticForward")
+        self.quasitasticBackwardLog = DoubleArrayLogEntry(log, "/SysId/quasitasticBackward")
+        self.dynamicForwardLog = DoubleArrayLogEntry(log, "/SysId/dynamicForward")
+        self.dynamicBackwardLog = DoubleArrayLogEntry(log, "/SysId/dynamicBackward")
+        
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
@@ -47,3 +60,6 @@ class RobotContainer:
 
     def getAutonomousCommand(self) -> Command:
         return self.autoChooser.getSelected()
+
+    def driveIdentification(self) -> Command:
+        return sequence(DynamicRoutine(self.drive, True, self.dynamicForwardLog), DynamicRoutine(self.drive, False, self.dynamicBackwardLog), QuasitasticRoutine(self.drive, True, self.quasitasticForwardLog), QuasitasticRoutine(self.drive, False, self.quasitasticBackwardLog))
