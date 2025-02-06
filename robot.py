@@ -10,6 +10,7 @@ class Robot(TimedCommandRobot):
 
     def robotInit(self) -> None:
         self.autonomousCommand: typing.Optional[Command] = None
+        self.testCommand: typing.Optional[Command] = None
         self.robotContainer = RobotContainer()
         
     def robotPeriodic(self):
@@ -17,7 +18,9 @@ class Robot(TimedCommandRobot):
         return super().robotPeriodic()
         
     def testInit(self) -> None:
-        pass
+        self.testCommand = self.robotContainer.driveIdentification()
+        if self.testCommand:
+            self.testCommand.schedule()
         
     def testPeriodic(self) -> None:
         pass
