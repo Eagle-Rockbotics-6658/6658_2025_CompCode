@@ -2,8 +2,10 @@ from rev import SparkMax, SparkLowLevel
 from constants import SubsystemConstants as sc
 from wpilib import DigitalInput
 from wpimath.controller import PIDController as PID
+from wpimath.controller import ArmFeedforward
 from commands2.command import Command
 from phoenix6.hardware import CANcoder
+from math import pi
 
 #this is henry's fault. he has a twisted mind
 class TrueBool:
@@ -29,6 +31,7 @@ class AlgaeSubsystem:
         self.endSwitch = DigitalInput(sc.Algae.endSwitchInputId)
         self.rotateController = PID(sc.Algae.kP, sc.Algae.kI, sc.Algae.kD)
         self.rotateController.setSetpoint(sc.Algae.rotate)
+        self.rotateFeedForward = ArmFeedforward(sc.Algae.kS, sc.Algae.kG, sc.Algae.kV, sc.Algae.kA)
         self.isExtended = False
 
         self.openCommand = OpenCommand(rotateMotor=self.rotateMotor, endSwitch=self.endSwitch)
@@ -60,12 +63,13 @@ class OpenCommand(Command):
     def runsWhenDisabled(self):
         return False
 class CloseCommand(Command):
-    def __init__(self, rotateMotor: SparkMax, rotateController:PID, rotateEncoder: CANcoder):
+    def __init__(self, rotateMotor: SparkMax, rotateController:PID, rotateEncoder: CANcoder, rotateFF: ArmFeedforward):
         self.rotateMotor = rotateMotor
+        self.rotateFF = rotateFF
         self.rotateController = rotateController
         self.rotateEncoder = rotateEncoder
     def execute(self):
-        pwr = self.rotateController.calculate(self.rotateEncoder)
+        pwr = self.rotateController.calculate(self.rotateEncoder.get_absolute_position()*2*(pi)) + self.rotateFF.calculate(sc.Algae.rotateSetpoint)
         self.rotateMotor.set(pwr)
         if self.rotateController.atSetpoint():
             self.end()
