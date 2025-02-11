@@ -78,3 +78,13 @@ class PathPlannerConstants():
     translationPID = (2.00, 0, -0.1)
 
     rotationPID = (-2.00, 0, 0.05)
+
+class SubsystemConstants():
+    class Algae:
+        wheelCanID = 0
+        rotateCanID = 0
+        wheelMotorConfig = SparkMaxConfig()
+        rotateMotorConfig = SparkMaxConfig()
+        canCoderId = 0
+        endSwitchInputId = 0
+        rotateSetpoint = 0
