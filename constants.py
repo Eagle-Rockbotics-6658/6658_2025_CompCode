@@ -88,3 +88,5 @@ class SubsystemConstants():
         canCoderId = 0
         endSwitchInputId = 0
         rotateSetpoint = 0
+        rotatePower = 0
+        intakePower = 0
