@@ -40,9 +40,9 @@ class AlgaeSubsystem:
         self.openCommand.end()
         self.closeCommand.end()
         if not self.isExtended:
-            self.openCommand.sc.Algaehedule()
+            self.openCommand.schedule()
         else:
-            self.closeCommand.sc.Algaehedule()
+            self.closeCommand.schedule()
 
 class OpenCommand(Command):
 
