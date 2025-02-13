@@ -45,7 +45,7 @@ class AlgaeSubsystem:
    
     def _runIntake(self, pwr: float):
         self.wheelMotor.set(pwr*sc.Algae.intakePower)
-        
+
     def toggleExtended(self):
         self.openCommand.end()
         self.closeCommand.end()
@@ -76,7 +76,9 @@ class CloseCommand(Command):
         self.rotateController = rotateController
         self.rotateEncoder = rotateEncoder
     def execute(self):
-        pwr = self.rotateController.calculate(self.rotateEncoder.get_absolute_position()*2*(pi)) + self.rotateFF.calculate(sc.Algae.rotateSetpoint)
+        angle = self.rotateEncoder.get_absolute_position()*2*pi
+        velocity = self.rotateEncoder.get_velocity()*2*pi
+        pwr = self.rotateController.calculate(angle) + self.rotateFF.calculate(angle,velocity)
         self.rotateMotor.set(pwr)
         if self.rotateController.atSetpoint():
             self.end()
