@@ -4,6 +4,7 @@ from wpilib import DigitalInput
 from wpimath.controller import PIDController as PID
 from wpimath.controller import ArmFeedforward
 from commands2.command import Command
+from commands2.subsystem import Subsystem
 from phoenix6.hardware import CANcoder
 from math import pi
 
@@ -19,7 +20,7 @@ class TrueBool:
             if self.is_true != True and self.is_true is False:
                 return False
 
-class AlgaeSubsystem:
+class AlgaeSubsystem(Subsystem):
     def __init__(self):
         self.wheelMotor = SparkMax(sc.Algae.wheelCanID, SparkLowLevel.MotorType.kBrushless)
         self.rotateMotor = SparkMax(sc.Algae.rotateCanID, SparkLowLevel.MotorType.kBrushless)
