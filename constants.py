@@ -90,6 +90,8 @@ class SubsystemConstants():
         rotateSetpoint = 0
         rotatePower = 0
         intakePower = 0
+        #As a fraction of intakePower
+        intakeBasePower = 0.5
 
         kP = 0
         kI = 0

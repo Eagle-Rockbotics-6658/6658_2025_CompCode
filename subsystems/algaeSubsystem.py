@@ -37,8 +37,15 @@ class AlgaeSubsystem:
         self.openCommand = OpenCommand(rotateMotor=self.rotateMotor, endSwitch=self.endSwitch)
         self.closeCommand = CloseCommand(rotateController=self.rotateController, rotateEncoder=self.rotateEncoder, rotateMotor=self.rotateMotor)
     
-    def runIntake(self, runIn: bool):
-        self.wheelMotor.set(sc.Algae.intakePower)
+    def intake(self):
+        self._runIntake(1)
+
+    def teleopPeriodic(self) -> None:
+        self._runIntake(sc.Algae.intakeBasePower)
+   
+    def _runIntake(self, pwr: float):
+        self.wheelMotor.set(pwr*sc.Algae.intakePower)
+        
     def toggleExtended(self):
         self.openCommand.end()
         self.closeCommand.end()
