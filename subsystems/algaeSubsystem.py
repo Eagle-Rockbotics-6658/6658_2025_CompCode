@@ -29,6 +29,8 @@ class AlgaeSubsystem(Subsystem):
         self.rotateMotor.configure(sc.Algae.rotateMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         
         self.rotateEncoder = CANcoder(sc.Algae.canCoderId)
+        self.rotateEncoder.set_position(0)
+        
         self.endSwitch = DigitalInput(sc.Algae.endSwitchInputId)
         self.rotateController = PID(sc.Algae.kP, sc.Algae.kI, sc.Algae.kD)
         self.rotateController.setSetpoint(sc.Algae.rotate)
