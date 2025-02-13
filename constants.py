@@ -109,3 +109,11 @@ class SubsystemConstants():
         encoderId = 0
         cutoff = 0
         pwr = 0
+    class Elevator:
+        elevatorMotorCanId = 0
+        elevatorEncoderCanId = 0
+        kP = 0
+        kI = 0
+        kD = 0
+        kF = 0
+
