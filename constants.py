@@ -106,7 +106,8 @@ class SubsystemConstants():
         rightMotorId = 0
         motorConfig = SparkMaxConfig()
 
-        encoderId = 0
+        leftEncoderId = 0
+        rightEncoderId = 0
         cutoff = 0
         pwr = 0
     class Elevator:

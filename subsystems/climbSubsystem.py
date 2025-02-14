@@ -11,11 +11,13 @@ class ClimbSubsystem(Subsystem):
         self.climbMotorLeft.configure(sc.Climb.motorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.climbMotorRight.configure(sc.Climb.motorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
 
-        self.climbEncoder = CANcoder(sc.Climb.encoderId)
-        self.climbEncoder.set_position(0)
+        self.leftClimbEncoder = CANcoder(sc.Climb.leftEncoderId)
+        self.rightClimbEncoder = CANcoder(sc.Climb.rightEncoderId)
+        self.leftClimbEncoder.set_position(0)
+        self.rightClimbEncoder.set_position(0)
 
     def run(self):
-        if abs(self.climbEncoder.get_absolute_position()) >= sc.Climb.cutoff:
+        if abs(self.leftClimbEncoder.get_absolute_position()) >= sc.Climb.cutoff or abs(self.rightClimbEncoder.get_absolute_position()) >= sc.Climb.cutoff:
             self.climbMotorRight.set(0)
             self.climbMotorLeft.set(0)
         else:
