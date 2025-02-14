@@ -108,6 +108,7 @@ class SubsystemConstants():
 
         leftEncoderId = 0
         rightEncoderId = 0
+        #should be the abs value of the true cutoff in rotations, setting the encoders to zero at the rest position of the climb
         cutoff = 0
         pwr = 0
     class Elevator:
