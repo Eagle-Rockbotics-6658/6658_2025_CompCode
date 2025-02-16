@@ -1,9 +1,10 @@
 from ntcore import NetworkTableInstance
-from commands2 import Subsystem, Command
+from commands2 import Subsystem, Command, InstantCommand
 from commands2.cmd import run
 from phoenix6.hardware import Pigeon2
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
 from math import pi
+from typing import Callable
 
 class LimeLight(Subsystem):
     
