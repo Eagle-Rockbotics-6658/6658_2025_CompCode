@@ -101,3 +101,11 @@ class SubsystemConstants():
         kV = 0
         kG = 0
         kA = 0
+    class Climb:
+        leftMotorId = 0
+        rightMotorId = 0
+        motorConfig = SparkMaxConfig()
+
+        encoderId = 0
+        cutoff = 0
+        pwr = 0
