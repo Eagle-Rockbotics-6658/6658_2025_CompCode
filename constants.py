@@ -33,19 +33,19 @@ class SwerveModuleConstants():
 class DriveConstants():
     deadband = 0.07
     FLDrivingCAN = 4
-    FRDrivingCAN = 6
-    RLDrivingCAN = 8
+    FRDrivingCAN = 8
+    RLDrivingCAN = 6
     RRDrivingCAN = 2
 
     FLTurningCAN = 3
-    FRTurningCAN = 5
-    RLTurningCAN = 7
+    FRTurningCAN = 7
+    RLTurningCAN = 5
     RRTurningCAN = 1
 
-    FLEncoderCAN = 10
-    FREncoderCAN = 13
-    RLEncoderCAN = 12
-    RREncoderCAN = 11
+    FLEncoderCAN = 12
+    FREncoderCAN = 10
+    RLEncoderCAN = 11
+    RREncoderCAN = 13
 
     PigeonGyro = 14
     
