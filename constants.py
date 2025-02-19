@@ -87,10 +87,13 @@ class SubsystemConstants():
         rotateMotorConfig = SparkMaxConfig()
         canCoderId = 0
         endSwitchInputId = 0
-        rotateSetpoint = 0
+        
+        inPoint = 0
+        outPoint = 0
+
         rotatePower = 0
         intakePower = 0
-        #As a fraction of intakePower
+        #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
         intakeBasePower = 0.5
 
         kP = 0
