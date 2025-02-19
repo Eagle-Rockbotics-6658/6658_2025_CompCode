@@ -1,4 +1,5 @@
 from subsystems.drive_system.swerveDrive import SwerveDrive
+from subsystems.coral import CoralMechanism
 
 from constants import DriveConstants as d
 from constants import robotConstants as c
@@ -22,6 +23,8 @@ class RobotContainer:
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
 
+        self.coralMechanism = CoralMechanism()
+
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
 
@@ -31,6 +34,7 @@ class RobotContainer:
         
         self.configureButtonBindings()
         self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
+        self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(.5 if self.driveStick.getRawButton(4) else 0), self.coralMechanism))
         
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
