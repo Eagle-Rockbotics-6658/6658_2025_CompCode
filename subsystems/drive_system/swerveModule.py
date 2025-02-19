@@ -108,6 +108,7 @@ class SwerveModule:
             )
         )
 
+        # self.drivingSparkMax.set(0)
         self.drivingSparkMax.set(
             self.drivingPIDController.calculate(self.getState().speed, desiredState.speed) + 
             self.drivingFeedForwardController.calculate(desiredState.speed)
