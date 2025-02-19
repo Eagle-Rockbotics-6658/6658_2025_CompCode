@@ -1,4 +1,5 @@
 from subsystems.drive_system.swerveDrive import SwerveDrive
+from subsystems.algaeSubsystem import AlgaeSubsystem
 
 from constants import DriveConstants as d
 from constants import robotConstants as c
@@ -22,6 +23,8 @@ class RobotContainer:
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
 
+        self.algaeSystem = AlgaeSubsystem()
+
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
 
@@ -30,7 +33,13 @@ class RobotContainer:
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
         self.configureButtonBindings()
-        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
+        # self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
+        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(0, 0, 0))), self.drive))
+        self.algaeSystem.setDefaultCommand(run(
+                lambda: self.algaeSystem.runIntakeAndPivot(
+                    self.driveStick.getRawAxis(1), self.driveStick.getRawAxis(5)
+                ), self.algaeSystem
+            ))
         
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))

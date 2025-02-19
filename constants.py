@@ -81,10 +81,10 @@ class PathPlannerConstants():
 
 class SubsystemConstants():
     class Algae:
-        wheelCanID = 0
-        rotateCanID = 0
-        wheelMotorConfig = SparkMaxConfig()
-        rotateMotorConfig = SparkMaxConfig()
+        intakeCanID = 17
+        pivotCanID = 18
+        intakeMotorConfig = SparkMaxConfig()
+        pivotMotorConfig = SparkMaxConfig()
         canCoderId = 0
         endSwitchInputId = 0
         
@@ -96,7 +96,7 @@ class SubsystemConstants():
         #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
         intakeBasePower = 0.5
 
-        kP = 0
+        kP = .01
         kI = 0
         kD = 0
 
