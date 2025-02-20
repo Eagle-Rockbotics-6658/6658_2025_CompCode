@@ -36,14 +36,13 @@ class RobotContainer:
         # self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
         self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(0, 0, 0))), self.drive))
         self.algaeSystem.setDefaultCommand(run(
-                lambda: self.algaeSystem.runIntakeAndPivot(
-                    self.driveStick.getRawAxis(1), self.driveStick.getRawAxis(5)
-                ), self.algaeSystem
+                lambda: self.algaeSystem.runFeedForward(self.driveStick.getRawAxis(1)/10), self.algaeSystem
             ))
         
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
+        JoystickButton(self.driveStick, 2).onTrue(runOnce(self.algaeSystem.resetEncoder, self.algaeSystem))
         # JoystickButton(self.driveStick, 4).whileTrue(run(lambda: self.drive.pathFindToPose(Pose2d(0, 0, 0)), self.drive))
     
     def getJoystickDeadband(self, axis: int) -> float:
