@@ -85,7 +85,7 @@ class SwerveModule:
         
     def getPosition(self) -> SwerveModulePosition:
         """
-        Get current position of the module
+        Get current position of the module 
         
         **Returns**:
             `SwerveModulePosition`: The current position of the module

@@ -15,7 +15,7 @@ class CoralMechanism(Subsystem):
         
         self.intakeMotor = SparkMax(19, SparkLowLevel.MotorType.kBrushed)
         intakeConfig = SparkMaxConfig()
-        self.intakeMotor.configure(intakeConfig)
+        # self.intakeMotor.configure(intakeConfig)
         
         # self.pivotPIDController = PIDController(0, 0, 0)
         # self.pivotFeedForward = ArmFeedforward(0, 0)

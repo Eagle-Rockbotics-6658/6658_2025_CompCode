@@ -33,8 +33,8 @@ class RobotContainer:
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
         self.configureButtonBindings()
-        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
-        self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(.5 if self.driveStick.getRawButton(4) else 0), self.coralMechanism))
+        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(0, 0, 0))), self.drive))
+        self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(self.driveStick.getRawAxis(1)), self.coralMechanism))
         
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
