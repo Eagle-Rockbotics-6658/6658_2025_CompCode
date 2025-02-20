@@ -71,10 +71,10 @@ class AlgaeSubsystem(Subsystem):
         self.pivotEncoder.setPosition(0)
     
     def getPivotPosition(self) -> float:
-        return self.pivotEncoder.getPosition()*2*pi
+        return self.pivotEncoder.getPosition()*2*pi*sc.Algae.pivotGearRatio
     
     def getPivotVelocity(self) -> float:
-        return self.pivotEncoder.getVelocity()*2*pi
+        return self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
     
     def runFeedForward(self, positionChange: float):
         self.targetPosition += positionChange

@@ -92,10 +92,12 @@ class SubsystemConstants():
         inPoint = 0
         outPoint = 0
 
-        rotatePower = 0
+        pivotPower = 0
         intakePower = -0.01
         #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
         intakeBasePower = 0.1
+        
+        pivotGearRatio = 1/25
 
         kP = 0
         kI = 0
@@ -105,6 +107,7 @@ class SubsystemConstants():
         kV = 0
         kG = 0.1
         kA = 0
+    
     class Climb:
         leftMotorId = 0
         rightMotorId = 0
