@@ -84,24 +84,26 @@ class SubsystemConstants():
         intakeCanID = 17
         pivotCanID = 18
         intakeMotorConfig = SparkMaxConfig()
-        pivotMotorConfig = SparkMaxConfig()
+        pivotMotorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kBrake)
         canCoderId = 0
         endSwitchInputId = 0
         
         #in radians
-        inPoint = 0
-        outPoint = 0
+        inPoint = 0.24
+        outPoint = 0.04
 
         pivotPower = 0
-        intakePower = -0.01
+        intakePower = -1
         #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
         intakeBasePower = 0.1
+        #In rotations
+        pivotStartRotations = 0.2462868804
         
-        pivotGearRatio = 1/25
+        pivotGearRatio = -3/125
 
-        kP = 0
+        kP = 1.75
         kI = 0
-        kD = 0
+        kD = 0.01
 
         kS = 0
         kV = 0

@@ -3,6 +3,7 @@ from subsystems.algaeSubsystem import AlgaeSubsystem
 
 from constants import DriveConstants as d
 from constants import robotConstants as c
+from constants import SubsystemConstants as s
 
 from wpilib import Joystick, SmartDashboard
 from pathplannerlib.auto import AutoBuilder
@@ -35,14 +36,12 @@ class RobotContainer:
         self.configureButtonBindings()
         # self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
         self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(0, 0, 0))), self.drive))
-        self.algaeSystem.setDefaultCommand(run(
-                lambda: self.algaeSystem.runFeedForward(self.driveStick.getRawAxis(1)/10), self.algaeSystem
-            ))
         
     def configureButtonBindings(self) -> None:
         JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
-        JoystickButton(self.driveStick, 2).onTrue(runOnce(self.algaeSystem.resetEncoder, self.algaeSystem))
+        JoystickButton(self.driveStick, 2).onTrue(runOnce(lambda: self.algaeSystem.resetEncoder(s.Algae.pivotStartRotations/s.Algae.pivotGearRatio), self.algaeSystem))
+        JoystickButton(self.driveStick, 4).onTrue(runOnce(self.algaeSystem.toggleExtended, self.algaeSystem))
         # JoystickButton(self.driveStick, 4).whileTrue(run(lambda: self.drive.pathFindToPose(Pose2d(0, 0, 0)), self.drive))
     
     def getJoystickDeadband(self, axis: int) -> float:
