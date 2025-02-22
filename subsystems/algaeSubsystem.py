@@ -21,10 +21,38 @@ from wpilib import SmartDashboard
 #             if self.is_true != True and self.is_true is False:
 #                 return False
 
-class AlgaeSubsystem(Subsystem):
+
+class AlgaeIntake(Subsystem):
+
     def __init__(self):
         #motor that runs the intake rollers
         self.intakeMotor = SparkMax(sc.Algae.intakeCanID, SparkLowLevel.MotorType.kBrushless)
+        super().__init__()
+    
+    # #Run when button to intake ball is held. will not run if there is already a ball in the intake
+    # def intake(self):
+    #     self._runIntake(1)
+    
+    # #Run when the button to push balls out is held.
+    # def runOut(self):
+    #     self._runIntake(-1)
+    
+    # def stopIntake(self):
+    #     self._runIntake(0)
+    
+    def _runIntake(self, pwr: float):
+        self.intakeMotor.set(pwr*sc.Algae.intakePower)
+    
+    def controlIntake(self, runOutButton: bool, runInButton: bool):
+        if runOutButton:
+            self._runIntake(-1)
+        elif runInButton:
+            self._runIntake(1)
+        else:
+            self._runIntake(0)
+
+class AlgaePivot(Subsystem):
+    def __init__(self):
         #motor that runs the deploy and retract of the mechanism
         self.pivotMotor = SparkMax(sc.Algae.pivotCanID, SparkLowLevel.MotorType.kBrushless)
         
@@ -41,26 +69,12 @@ class AlgaeSubsystem(Subsystem):
 
         self.foldCommand = FoldCommand(pivotMotor=self.pivotMotor, pivotController=self.pivotController, pivotEncoder=self.pivotEncoder, pivotFF=self.pivotFeedForward, isOpening=False)
 
-    #Run when button to intake ball is held. will not run if there is already a ball in the intake
-    def intake(self):
-        self._runIntake(1)
-    
-    #Run when the button to push balls out is held.
-    def runOut(self):
-        self._runIntake(-1)
-
     def teleopPeriodic(self) -> None:
-        self._runIntake(sc.Algae.intakeBasePower)
+        # self._runIntake(sc.Algae.intakeBasePower)
         angle = self.pivotEncoder.getPosition()*2*pi*sc.Algae.pivotGearRatio
         angularVelocity = self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
         pwr = -self.pivotFeedForward.calculate(angle, angularVelocity)
         self.pivotMotor.set(pwr)
-
-
-   
-    def _runIntake(self, pwr: float):
-        self.intakeMotor.set(pwr*sc.Algae.intakePower)
-        self.pivotMotor.set(self.pivotFeedForward.calculate())
 
     def toggleExtended(self):
         if self.foldCommand.isScheduled():
@@ -78,12 +92,10 @@ class AlgaeSubsystem(Subsystem):
     def getPivotVelocity(self) -> float:
         return self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
     
-    def runFeedForward(self, positionChange: float):
-        self.intakeMotor.set(-.05)
-        self.pivotMotor.set(0)
+    # def runFeedForward(self, positionChange: float):
+    #     self.pivotMotor.set(0)
         
-        SmartDashboard.putNumber("Algae Pivot Position", self.getPivotPosition()/(2*pi))
-
+    #     SmartDashboard.putNumber("Algae Pivot Position", self.getPivotPosition()/(2*pi))
 
 class FoldCommand(Command):
     def __init__(self, pivotMotor: SparkMax, pivotController:PID, pivotEncoder: SparkRelativeEncoder, pivotFF: ArmFeedforward, isOpening: bool):
@@ -112,3 +124,9 @@ class FoldCommand(Command):
         self.pivotMotor.set(0)
     def runsWhenDisabled(self):
         return False
+    
+# class IntakeCommand(Command):
+#     def __init__(self, parent: AlgaeSubsystem):
+#         self.parent = parent
+#         self.running = 
+#     def        

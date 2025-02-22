@@ -15,6 +15,7 @@ from pathplannerlib.config import PIDConstants, RobotConfig
 from pathplannerlib.path import PathConstraints
 from wpimath.units import degreesToRadians
 from commands2.command import Command
+from wpilib import SmartDashboard
 
 from commands2 import Subsystem
 
@@ -94,13 +95,16 @@ class SwerveDrive(Subsystem):
     def _publishStates(self) -> None:
         """Publishes the estimated robot state to the driverstation"""
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
-        self.ObservedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish() #observed
-        self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Blue", SwerveModuleState).publish() #predicted
+        self.ObservedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Observed", SwerveModuleState).publish() #observed
+        self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Desired", SwerveModuleState).publish() #predicted
 
     def _updateStates(self, desiredStates: tuple[SwerveModuleState]) -> None:
+        self.oldOdometry = Pose2d()
         self.ObservedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
         self.DesiredPublisher.set(desiredStates)
+        SmartDashboard.putNumber("Velocity (Crude)", (self.odometry.getEstimatedPosition().X() - self.oldOdometry.X())/(0.050))
+        self.oldOdometry = self.odometry.getEstimatedPosition()
 
     def getHeading(self) -> Rotation2d:
         """Gets the heading of the robot

@@ -4,6 +4,8 @@ from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Translation2d
 from math import pi
 
+from wpilib import SmartDashboard
+
 class SwerveModuleConstants():
     drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
@@ -13,8 +15,8 @@ class SwerveModuleConstants():
     drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
     
-    drivingPID = (.04, 0, .008)
-    drivingSVA = (0, 6.102634556313851, 0)
+    drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .008)
+    drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
@@ -24,7 +26,7 @@ class SwerveModuleConstants():
     turningMotorConfig = SparkMaxConfig()
     turningMotorConfig.setIdleMode(turningIdleMode)
     
-    turningPID = (0.16, 0, 0.008)
+    turningPID = (1.0, 0, 0.000)
     wheelDiameter = .09
 
     turnEncoderMin = 0.0
@@ -49,8 +51,8 @@ class DriveConstants():
 
     PigeonGyro = 14
     
-    halfTrackWidth = inchesToMeters(58)/2
-    halfWheelBase = inchesToMeters(58)/2
+    halfTrackWidth = inchesToMeters(26)/2
+    halfWheelBase = inchesToMeters(26)/2
     
     kinematics = SwerveDrive4Kinematics(
         Translation2d(halfWheelBase, halfTrackWidth),
@@ -59,7 +61,7 @@ class DriveConstants():
         Translation2d(-halfWheelBase, -halfTrackWidth),
     )
     
-    MaxSpeed = 2.0  # 3.8 meters per second
+    MaxSpeed = 3.8  # 3.8 meters per second
     
 class IntakeConstants():
     angleID = 21
@@ -75,9 +77,10 @@ class robotConstants():
     joystickID = 0
 
 class PathPlannerConstants():
-    translationPID = (2.00, 0, -0.1)
+    translationPID = (5, 0, 0)
+    SmartDashboard.putNumberArray("translationPID", translationPID)
 
-    rotationPID = (-2.00, 0, 0.05)
+    rotationPID = (5.00, 0, 0.00)
 
 class SubsystemConstants():
     class Algae:
@@ -93,7 +96,7 @@ class SubsystemConstants():
         outPoint = 0.04
 
         pivotPower = 0
-        intakePower = -1
+        intakePower = -0.1
         #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
         intakeBasePower = 0.1
         #In rotations
