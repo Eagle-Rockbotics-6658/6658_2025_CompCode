@@ -17,7 +17,10 @@ from wpimath.units import degreesToRadians
 from commands2.command import Command
 from wpilib import SmartDashboard
 
+from vision.limelight import LimeLight
+
 from commands2 import Subsystem
+from typing import Callable
 
 
 class SwerveDrive(Subsystem):
@@ -223,3 +226,15 @@ class SwerveDrive(Subsystem):
             goal_end_vel=0.0, # Goal end velocity in meters/sec
             # rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
         )
+    def goToPose(self, targetPose: Pose2d, vision: LimeLight) -> Command:
+        h = PositionResetter(vision.getRobotPose, self.resetPose)
+        return self.pathFindToPose(targetPose).beforeStarting(h)
+
+class PositionResetter:
+    def __init__(self, getFn: Callable[[], (Pose2d | None)], resetFn: Callable[[Pose2d], None]):
+        self.getFn = getFn
+        self.resetFn = resetFn
+    def __call__(self):
+        while self.getFn() == None:
+            True
+        self.resetFn(self.getFn)
