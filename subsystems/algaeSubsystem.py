@@ -41,15 +41,16 @@ class AlgaeIntake(Subsystem):
     #     self._runIntake(0)
     
     def _runIntake(self, pwr: float):
-        self.intakeMotor.set(pwr*sc.Algae.intakePower)
+        self.intakeMotor.set(pwr)
+        
     
     def controlIntake(self, runOutButton: bool, runInButton: bool):
         if runOutButton:
-            self._runIntake(-1)
+            self._runIntake(sc.Algae.intakePowerOut)
         elif runInButton:
-            self._runIntake(1)
+            self._runIntake(sc.Algae.intakePowerIn)
         else:
-            self._runIntake(0)
+            self._runIntake(sc.Algae.intakePowerStalled)
 
 class AlgaePivot(Subsystem):
     def __init__(self):
@@ -91,6 +92,10 @@ class AlgaePivot(Subsystem):
     
     def getPivotVelocity(self) -> float:
         return self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
+
+    def periodic(self):
+        SmartDashboard.putNumber("Algae pivot position", self.pivotEncoder.getPosition()*sc.Algae.pivotGearRatio)
+        return super().periodic()
     
     # def runFeedForward(self, positionChange: float):
     #     self.pivotMotor.set(0)

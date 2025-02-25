@@ -36,18 +36,18 @@ class DriveConstants():
     deadband = 0.07
     FLDrivingCAN = 4
     FRDrivingCAN = 8
-    RLDrivingCAN = 6
-    RRDrivingCAN = 2
+    RLDrivingCAN = 2
+    RRDrivingCAN = 6
 
     FLTurningCAN = 3
     FRTurningCAN = 7
-    RLTurningCAN = 5
-    RRTurningCAN = 1
+    RLTurningCAN = 1
+    RRTurningCAN = 5
 
     FLEncoderCAN = 12
     FREncoderCAN = 10
-    RLEncoderCAN = 11
-    RREncoderCAN = 13
+    RLEncoderCAN = 13
+    RREncoderCAN = 11
 
     PigeonGyro = 14
     
@@ -86,21 +86,23 @@ class SubsystemConstants():
     class Algae:
         intakeCanID = 17
         pivotCanID = 18
-        intakeMotorConfig = SparkMaxConfig()
+        intakeMotorConfig = SparkMaxConfig().smartCurrentLimit(3)
         pivotMotorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kBrake)
         canCoderId = 0
         endSwitchInputId = 0
         
         #in radians
-        inPoint = 0.24
-        outPoint = 0.04
+        inPoint = 0.25
+        outPoint = 0.02
 
         pivotPower = 0
-        intakePower = -0.1
-        #a fraction of intakePower; the power that the wheels on the intake run at when we are not intaking
-        intakeBasePower = 0.1
+        intakePowerIn = -0.25
+        intakePowerOut = 0.25
+        intakePowerStalled = 0.1
+
+
         #In rotations
-        pivotStartRotations = 0.2462868804
+        pivotStartRotations = 0.32
         
         pivotGearRatio = -3/125
 
