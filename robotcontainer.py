@@ -1,4 +1,5 @@
 from subsystems.drive_system.swerveDrive import SwerveDrive
+from subsystems.coral import CoralMechanism
 from subsystems.algaeSubsystem import AlgaePivot, AlgaeIntake
 
 from constants import DriveConstants as d
@@ -27,6 +28,7 @@ class RobotContainer:
         self.algaePivot = AlgaePivot()
         self.algaeIntake = AlgaeIntake()
 
+        self.coralMechanism = CoralMechanism()
 
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
@@ -36,7 +38,8 @@ class RobotContainer:
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
         self.configureButtonBindings()
-        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))), self.drive))
+        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(0, 0, 0))), self.drive))
+        self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(self.driveStick.getRawAxis(1)), self.coralMechanism))
         self.algaeIntake.setDefaultCommand(run(lambda: self.algaeIntake.controlIntake(self.driveStick.getRawButton(5), self.driveStick.getRawButton(6)), self.algaeIntake))
         
     def configureButtonBindings(self) -> None:
