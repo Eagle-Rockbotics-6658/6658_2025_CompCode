@@ -20,6 +20,7 @@ from math import copysign
 
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Pose2d
+from subsystems.elevatorSubsystem import Elevator
 
 
 class RobotContainer:
@@ -34,7 +35,7 @@ class RobotContainer:
         # self.algaePivot = AlgaePivot()
         # self.algaeIntake = AlgaeIntake()
         self.climbMechanism = ClimbSubsystem()
-
+        self.elevator = Elevator()
         # self.coralMechanism = CoralMechanism()
 
         # register commands

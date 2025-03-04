@@ -131,3 +131,13 @@ class SubsystemConstants():
         intakeSlightIn = .1
         intakeOut = -1
         intakeMotorID = 19
+    class Elevator:
+        motorID = 14
+        elevatorConfig = SparkFlexConfig()
+        elevatorP = 0
+        elevatorI = 0
+        elevatorD = 0
+        elevatorMax = 0
+        elevatorMin = 100
+        elevatorFF = 0.1
+      
