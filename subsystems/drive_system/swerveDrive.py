@@ -20,8 +20,12 @@ from commands2.command import Command
 from wpilib import SmartDashboard
 from wpilib import Timer
 
+from commands2.sysid import SysIdRoutine
+from wpilib.sysid import SysIdRoutineLog
+
 from commands2 import Subsystem
 from typing import Callable
+from wpilib import PowerDistribution
 
 
 class SwerveDrive(Subsystem):
@@ -52,6 +56,8 @@ class SwerveDrive(Subsystem):
         self.lastDesiredSpeedFL = 0
         self.controlArray = []
         
+        self.PDH = PowerDistribution(9, PowerDistribution.ModuleType.kRev)
+
         self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
         
         self.gyro = Pigeon2(c.PigeonGyro)
@@ -73,6 +79,8 @@ class SwerveDrive(Subsystem):
         # Load the RobotConfig from the GUI settings. You should probably
         # store this in your Constants file
         config = RobotConfig.fromGUISettings()
+
+        self.swerveTuner = SysIdRoutine(SysIdRoutine.Config(), SysIdRoutine.Mechanism(self.driveSysId, self.logSysId, self, "Swerve"))
 
         AutoBuilder.configure(
             self.getPose,
@@ -105,7 +113,21 @@ class SwerveDrive(Subsystem):
         pose = self.limelight.getRobotPose()
         if pose != None:
             self.odometry.resetPose(pose)
-        
+
+    def driveSysId(self, volts: float):
+        self.setModuleStatesVoltage((
+            SwerveModuleState(volts, Rotation2d()),
+            SwerveModuleState(volts, Rotation2d()),
+            SwerveModuleState(volts, Rotation2d()),
+            SwerveModuleState(volts, Rotation2d())
+        ))
+    def logSysId(self, log: SysIdRoutineLog):
+        log.motor("swerve-FL").voltage(self.moduleFL.drivingSparkMax.get() * self.PDH.getVoltage()).velocity(self.moduleFL.getState().speed)
+        log.motor("swerve-FR").voltage(self.moduleFR.drivingSparkMax.get() * self.PDH.getVoltage()).velocity(self.moduleFR.getState().speed)
+        log.motor("swerve-RL").voltage(self.moduleRL.drivingSparkMax.get() * self.PDH.getVoltage()).velocity(self.moduleRL.getState().speed)
+        log.motor("swerve-RR").voltage(self.moduleRR.drivingSparkMax.get() * self.PDH.getVoltage()).velocity(self.moduleRR.getState().speed)
+
+    
     def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
         # This will flip the path being followed to the red side of the field.
@@ -167,6 +189,11 @@ class SwerveDrive(Subsystem):
         """
         return self.odometry.getEstimatedPosition()
     
+    def swerveTunerQuasistatic(self, direction: SysIdRoutine.Direction) -> Command:
+        return self.swerveTuner.quasistatic(direction)
+    def swerveTunerDynamic(self, direction: SysIdRoutine.Direction) -> Command:
+        return self.swerveTuner.dynamic(direction)
+    
     def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
         """Gets the robot relative ChassisSpeeds of the robot
 
@@ -207,6 +234,28 @@ class SwerveDrive(Subsystem):
         if len(self.controlArray) <= 100000:
             self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
+
+    def setModuleStatesVoltage(self, desiredStates: tuple[SwerveModuleState]) -> None:
+        """Sets the desired states of the swerve modules
+
+        **Args**:
+            `desiredStates` (tuple[SwerveModuleState]): a 4 tuple containing the SwerveModuleState for each module
+        """
+        desiredStates = c.kinematics.desaturateWheelSpeeds(desiredStates, c.MaxSpeed)
+        self.moduleFL.setDesiredStateVoltage(desiredStates[0])
+        self.moduleFR.setDesiredStateVoltage(desiredStates[1])
+        self.moduleRL.setDesiredStateVoltage(desiredStates[2])
+        self.moduleRR.setDesiredStateVoltage(desiredStates[3])
+        self.odometry.updateWithTime(
+            Timer.getTimestamp(),
+            self.getHeading(), 
+            (
+                self.moduleFL.getPosition(),
+                self.moduleFR.getPosition(),
+                self.moduleRL.getPosition(),
+                self.moduleRR.getPosition()
+            )
+        )
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using field relative speeds
@@ -244,6 +293,7 @@ class SwerveDrive(Subsystem):
     def goToPose(self, targetPose: Pose2d, vision: LimeLight) -> Command:
         h = PositionResetter(vision.getRobotPose, self.resetPose)
         return self.pathFindToPose(targetPose).beforeStarting(h)
+    
 
 class PositionResetter:
     def __init__(self, getFn: Callable[[], (Pose2d | None)], resetFn: Callable[[Pose2d], None]):
