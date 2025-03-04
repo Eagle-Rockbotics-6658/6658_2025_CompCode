@@ -1,4 +1,6 @@
 from subsystems.drive_system.swerveModule import SwerveModule
+from subsystems.vision.limelight import LimeLight
+
 from constants import DriveConstants as c
 from constants import PathPlannerConstants as p
 from phoenix6.hardware import Pigeon2
@@ -15,16 +17,14 @@ from pathplannerlib.config import PIDConstants, RobotConfig
 from pathplannerlib.path import PathConstraints
 from wpimath.units import degreesToRadians
 from commands2.command import Command
+from wpilib import SmartDashboard
+from wpilib import Timer
+
+from commands2 import Subsystem
+from typing import Callable
 
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-class SwerveDrive(metaclass=Singleton):
+class SwerveDrive(Subsystem):
     r"""
     Class for controlling a single swerve module
     
@@ -43,10 +43,10 @@ class SwerveDrive(metaclass=Singleton):
     - `setX` - Set modules into an X configuration to prevent movement
     """
     def __init__(self) -> None:
-        self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, True, False)
-        self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
+        self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, False, False)
+        self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, True, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
-        self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
+        self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, True, False)
 
         #
         self.lastDesiredSpeedFL = 0
@@ -89,6 +89,22 @@ class SwerveDrive(metaclass=Singleton):
         )
         
         self.pathFindingConstraints = PathConstraints(3.0, 5.0, degreesToRadians(540), degreesToRadians(720))
+
+        self.limelight = LimeLight()
+        self.limelight.sendRobotOrientationCommand(self.gyro).schedule()
+    
+    def periodic(self):
+        if DriverStation.isTeleop():
+            poseAndLatency = self.limelight.getRobotPoseAndLatency()
+            if poseAndLatency != None:
+                self.odometry.addVisionMeasurement(poseAndLatency[0], Timer.getTimestamp() - (poseAndLatency[1] / 1000))
+        # SmartDashboard.putNumberArray("turning current", [self.moduleFL.turningSparkMax.getOutputCurrent(), self.moduleFR.turningSparkMax.getOutputCurrent(), self.moduleRL.turningSparkMax.getOutputCurrent(), self.moduleRR.turningSparkMax.getOutputCurrent()])
+        return super().periodic()
+    
+    def resetOdometryToLimelight(self):
+        pose = self.limelight.getRobotPose()
+        if pose != None:
+            self.odometry.resetPose(pose)
         
     def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -99,12 +115,14 @@ class SwerveDrive(metaclass=Singleton):
     def _publishStates(self) -> None:
         """Publishes the estimated robot state to the driverstation"""
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
-        self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish()
+        self.ObservedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Observed", SwerveModuleState).publish() #observed
+        self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Desired", SwerveModuleState).publish() #predicted
 
-    def _updateStates(self) -> None:
-        self.RedPublisher.set(self.getModuleStates())
+    def _updateStates(self, desiredStates: tuple[SwerveModuleState]) -> None:
+        self.ObservedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
-        
+        self.DesiredPublisher.set(desiredStates)
+
     def getHeading(self) -> Rotation2d:
         """Gets the heading of the robot
 
@@ -129,7 +147,7 @@ class SwerveDrive(metaclass=Singleton):
         """
         return [self.moduleFL.getPosition(), self.moduleFR.getPosition(), self.moduleRL.getPosition(), self.moduleRR.getPosition()]
     
-    def zeroHeading(self) -> None:
+    def zeroHeading(self, degrees = 0) -> None:
         """Zeros the heading of the robot provided by the gyroscope"""
         self.gyro.set_yaw(0)
         
@@ -175,7 +193,8 @@ class SwerveDrive(metaclass=Singleton):
         self.moduleFR.setDesiredState(desiredStates[1])
         self.moduleRL.setDesiredState(desiredStates[2])
         self.moduleRR.setDesiredState(desiredStates[3])
-        self.odometry.update(
+        self.odometry.updateWithTime(
+            Timer.getTimestamp(),
             self.getHeading(), 
             (
                 self.moduleFL.getPosition(),
@@ -184,7 +203,7 @@ class SwerveDrive(metaclass=Singleton):
                 self.moduleRR.getPosition()
             )
         )
-        self._updateStates()
+        self._updateStates(desiredStates)
         if len(self.controlArray) <= 100000:
             self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
@@ -198,7 +217,7 @@ class SwerveDrive(metaclass=Singleton):
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
         self.setModuleStates(moduleStates)
-        
+            
     def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using robot relative speeds
         
@@ -220,5 +239,17 @@ class SwerveDrive(metaclass=Singleton):
             targetPose,
             self.pathFindingConstraints,
             goal_end_vel=0.0, # Goal end velocity in meters/sec
-            rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+            # rotation_delay_distance=0.0 # Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
         )
+    def goToPose(self, targetPose: Pose2d, vision: LimeLight) -> Command:
+        h = PositionResetter(vision.getRobotPose, self.resetPose)
+        return self.pathFindToPose(targetPose).beforeStarting(h)
+
+class PositionResetter:
+    def __init__(self, getFn: Callable[[], (Pose2d | None)], resetFn: Callable[[Pose2d], None]):
+        self.getFn = getFn
+        self.resetFn = resetFn
+    def __call__(self):
+        while self.getFn() == None:
+            True
+        self.resetFn(self.getFn)

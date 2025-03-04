@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.462134308510638,
+        "y": 5.880352393617021
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.1834281622104266,
+        "y": 5.875069417927999
+      },
+      "isLocked": false,
+      "linkedName": "Algae Pickup Left"
+    },
+    {
+      "anchor": {
+        "x": 1.563630319148936,
+        "y": 5.880352393617021
+      },
+      "prevControl": {
+        "x": 1.3136466867789567,
+        "y": 5.883213083588166
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 135.0,
+    "maxAngularAcceleration": 90.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": false
+}
