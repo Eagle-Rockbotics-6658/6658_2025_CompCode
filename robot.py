@@ -5,15 +5,32 @@ from commands2.command import Command
 from commands2 import TimedCommandRobot, CommandScheduler
 import typing
 
+import cProfile, pstats, io
+from pstats import SortKey
+
 
 from robotcontainer import RobotContainer
 
 from wpilib import PowerDistribution, DataLogManager
 from wpiutil.log import DoubleArrayLogEntry, DoubleLogEntry
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, Joystick
+from wpilib import Timer, DataLogManager, Joystick
+from wpiutil.log import StringLogEntry
 
 
 class Robot(TimedCommandRobot):
+
+    def _stopLogging(self):
+        self.prof.disable()
+        self.timer.stop()
+        s = io.StringIO()
+        sortby = SortKey.CUMULATIVE
+        ps = pstats.Stats(self.prof, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        out = s.getvalue()
+        self.dataLog.append(out)
+
+
 
     def robotInit(self) -> None:
         self.autonomousCommand: typing.Optional[Command] = None
@@ -21,6 +38,18 @@ class Robot(TimedCommandRobot):
         self.autonomousCommand = None
         self.testCommand = None
         self.teleopInitCommand = None
+        self.timer = Timer()
+
+        self.joystick = Joystick(0)
+
+        DataLogManager.start()
+        log = DataLogManager.getLog()
+        self.dataLog = StringLogEntry(log, "/U/logs/profiler")
+        
+        self.prof = cProfile.Profile(self.timer.get, 1)
+
+        self.timer.start()
+        self.prof.enable()
 
         # DataLogManager.start()
         # self.PDH = PowerDistribution(9, PowerDistribution.ModuleType.kRev)
@@ -31,6 +60,9 @@ class Robot(TimedCommandRobot):
         
     def robotPeriodic(self):
         CommandScheduler.getInstance().run()
+
+        if self.joystick.getRawButtonPressed(5):
+            self._stopLogging
 
         # self.currentLogIndividuals.append(self.PDH.getAllCurrents())
         # self.currentLogAll.append(self.PDH.getTotalCurrent())

@@ -53,8 +53,8 @@ class DriveConstants():
 
     PigeonGyro = 14
     
-    halfTrackWidth = inchesToMeters(24)/2
-    halfWheelBase = inchesToMeters(24)/2
+    halfTrackWidth = inchesToMeters(24.75)/2
+    halfWheelBase = inchesToMeters(24.75)/2
     
     kinematics = SwerveDrive4Kinematics(
         Translation2d(halfWheelBase, halfTrackWidth),
