@@ -4,6 +4,7 @@ from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.units import radians_per_second, rotationsToRadians
 from wpimath.controller import PIDController, ArmFeedforward
+from constants import SubsystemConstants as sc
 
 
 class CoralMechanism(Subsystem):
@@ -13,8 +14,7 @@ class CoralMechanism(Subsystem):
         # pivotConfig = SparkMaxConfig()
         # self.pivotMotor.configure(pivotConfig)
         
-        self.intakeMotor = SparkMax(19, SparkLowLevel.MotorType.kBrushed)
-        intakeConfig = SparkMaxConfig()
+        self.intakeMotor = SparkMax(sc.Coral.intakeMotorID, SparkLowLevel.MotorType.kBrushed)
         # self.intakeMotor.configure(intakeConfig)
         
         # self.pivotPIDController = PIDController(0, 0, 0)

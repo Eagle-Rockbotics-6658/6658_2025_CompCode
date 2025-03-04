@@ -1,4 +1,4 @@
-from rev import SparkMaxConfig
+from rev import SparkMaxConfig, SparkFlexConfig
 from wpimath.units import inchesToMeters
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Translation2d
@@ -14,8 +14,9 @@ class SwerveModuleConstants():
     drivingMotorConfig = SparkMaxConfig()
     drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
+    drivingMotorConfig.smartCurrentLimit(50)
     
-    drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .008)
+    drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
     drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
@@ -24,9 +25,10 @@ class SwerveModuleConstants():
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
     
     turningMotorConfig = SparkMaxConfig()
+    turningMotorConfig.smartCurrentLimit(50)
     turningMotorConfig.setIdleMode(turningIdleMode)
     
-    turningPID = (1.0, 0, 0.000)
+    turningPID = (1, 0, 0.000)
     wheelDiameter = .09
 
     turnEncoderMin = 0.0
@@ -51,8 +53,8 @@ class DriveConstants():
 
     PigeonGyro = 14
     
-    halfTrackWidth = inchesToMeters(26)/2
-    halfWheelBase = inchesToMeters(26)/2
+    halfTrackWidth = inchesToMeters(24)/2
+    halfWheelBase = inchesToMeters(24)/2
     
     kinematics = SwerveDrive4Kinematics(
         Translation2d(halfWheelBase, halfTrackWidth),
@@ -74,35 +76,36 @@ class IntakeConstants():
     kPitchKG = .07
 
 class robotConstants():
-    joystickID = 0
+    driveStickID = 0
+    helperStickID = 1
 
 class PathPlannerConstants():
     translationPID = (5, 0, 0)
-    SmartDashboard.putNumberArray("translationPID", translationPID)
 
     rotationPID = (5.00, 0, 0.00)
 
 class SubsystemConstants():
     class Algae:
-        intakeCanID = 17
+        intakeCanID = 16
         pivotCanID = 18
-        intakeMotorConfig = SparkMaxConfig().smartCurrentLimit(3)
+        intakeMotorConfig = SparkFlexConfig().smartCurrentLimit(40)
         pivotMotorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kBrake)
         canCoderId = 0
         endSwitchInputId = 0
         
-        #in radians
-        inPoint = 0.25
-        outPoint = 0.02
+        #in rotations
+        stowedPoint = 0.25
+        groundPickupPoint = 0.00
+        coralPickupPoint = 0.13
 
         pivotPower = 0
         intakePowerIn = -0.25
-        intakePowerOut = 0.25
-        intakePowerStalled = 0.1
+        intakePowerOut = .25
+        intakePowerStalled = 0  # -0.1
 
 
         #In rotations
-        pivotStartRotations = 0.32
+        pivotStartRotations = 0.3
         
         pivotGearRatio = -3/125
 
@@ -116,10 +119,15 @@ class SubsystemConstants():
         kA = 0
     
     class Climb:
-        leftMotorId = 0
-        rightMotorId = 0
-        motorConfig = SparkMaxConfig()
+        leftMotorId = 15
+        rightMotorId = 17
+        motorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kCoast)
 
         encoderId = 0
-        cutoff = 0
+        cutoff = 34
         pwr = 0
+    
+    class Coral:
+        intakeSlightIn = .1
+        intakeOut = -1
+        intakeMotorID = 19

@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start to reef"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Reef to PlayerStation"
+            "pathName": "Travel 15 ft"
           }
         }
       ]

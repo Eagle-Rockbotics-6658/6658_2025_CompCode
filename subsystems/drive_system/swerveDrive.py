@@ -1,4 +1,6 @@
 from subsystems.drive_system.swerveModule import SwerveModule
+from subsystems.vision.limelight import LimeLight
+
 from constants import DriveConstants as c
 from constants import PathPlannerConstants as p
 from phoenix6.hardware import Pigeon2
@@ -16,8 +18,7 @@ from pathplannerlib.path import PathConstraints
 from wpimath.units import degreesToRadians
 from commands2.command import Command
 from wpilib import SmartDashboard
-
-from vision.limelight import LimeLight
+from wpilib import Timer
 
 from commands2 import Subsystem
 from typing import Callable
@@ -88,6 +89,22 @@ class SwerveDrive(Subsystem):
         )
         
         self.pathFindingConstraints = PathConstraints(3.0, 5.0, degreesToRadians(540), degreesToRadians(720))
+
+        self.limelight = LimeLight()
+        self.limelight.sendRobotOrientationCommand(self.gyro).schedule()
+    
+    def periodic(self):
+        if DriverStation.isTeleop():
+            poseAndLatency = self.limelight.getRobotPoseAndLatency()
+            if poseAndLatency != None:
+                self.odometry.addVisionMeasurement(poseAndLatency[0], Timer.getTimestamp() - (poseAndLatency[1] / 1000))
+        # SmartDashboard.putNumberArray("turning current", [self.moduleFL.turningSparkMax.getOutputCurrent(), self.moduleFR.turningSparkMax.getOutputCurrent(), self.moduleRL.turningSparkMax.getOutputCurrent(), self.moduleRR.turningSparkMax.getOutputCurrent()])
+        return super().periodic()
+    
+    def resetOdometryToLimelight(self):
+        pose = self.limelight.getRobotPose()
+        if pose != None:
+            self.odometry.resetPose(pose)
         
     def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -102,12 +119,9 @@ class SwerveDrive(Subsystem):
         self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Desired", SwerveModuleState).publish() #predicted
 
     def _updateStates(self, desiredStates: tuple[SwerveModuleState]) -> None:
-        self.oldOdometry = Pose2d()
         self.ObservedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
         self.DesiredPublisher.set(desiredStates)
-        SmartDashboard.putNumber("Velocity (Crude)", (self.odometry.getEstimatedPosition().X() - self.oldOdometry.X())/(0.050))
-        self.oldOdometry = self.odometry.getEstimatedPosition()
 
     def getHeading(self) -> Rotation2d:
         """Gets the heading of the robot
@@ -133,7 +147,7 @@ class SwerveDrive(Subsystem):
         """
         return [self.moduleFL.getPosition(), self.moduleFR.getPosition(), self.moduleRL.getPosition(), self.moduleRR.getPosition()]
     
-    def zeroHeading(self) -> None:
+    def zeroHeading(self, degrees = 0) -> None:
         """Zeros the heading of the robot provided by the gyroscope"""
         self.gyro.set_yaw(0)
         
@@ -179,7 +193,8 @@ class SwerveDrive(Subsystem):
         self.moduleFR.setDesiredState(desiredStates[1])
         self.moduleRL.setDesiredState(desiredStates[2])
         self.moduleRR.setDesiredState(desiredStates[3])
-        self.odometry.update(
+        self.odometry.updateWithTime(
+            Timer.getTimestamp(),
             self.getHeading(), 
             (
                 self.moduleFL.getPosition(),

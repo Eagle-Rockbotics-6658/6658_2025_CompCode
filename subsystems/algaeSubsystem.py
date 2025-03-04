@@ -1,4 +1,4 @@
-from rev import SparkMax, SparkLowLevel, SparkRelativeEncoder
+from rev import SparkMax, SparkLowLevel, SparkRelativeEncoder, SparkFlex
 from constants import SubsystemConstants as sc
 from wpilib import DigitalInput
 from wpimath.controller import PIDController as PID
@@ -8,6 +8,7 @@ from commands2.subsystem import Subsystem
 from phoenix6.hardware import CANcoder
 from math import pi
 from wpilib import SmartDashboard
+from enum import Enum
 
 # #this is henry's fault. he has a twisted mind
 # class TrueBool:
@@ -22,11 +23,16 @@ from wpilib import SmartDashboard
 #                 return False
 
 
+STOWED = 0
+GROUNDPICKUP = 1
+CORALPICKUP = 2
+
 class AlgaeIntake(Subsystem):
 
     def __init__(self):
         #motor that runs the intake rollers
-        self.intakeMotor = SparkMax(sc.Algae.intakeCanID, SparkLowLevel.MotorType.kBrushless)
+        self.intakeMotor = SparkFlex(sc.Algae.intakeCanID, SparkLowLevel.MotorType.kBrushless)
+        self.intakeMotor.configure(sc.Algae.intakeMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         super().__init__()
     
     # #Run when button to intake ball is held. will not run if there is already a ball in the intake
@@ -94,13 +100,12 @@ class AlgaePivot(Subsystem):
         return self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
 
     def periodic(self):
-        SmartDashboard.putNumber("Algae pivot position", self.pivotEncoder.getPosition()*sc.Algae.pivotGearRatio)
+        # SmartDashboard.putNumber("Algae pivot position", self.pivotEncoder.getPosition()*sc.Algae.pivotGearRatio)
         return super().periodic()
     
     # def runFeedForward(self, positionChange: float):
     #     self.pivotMotor.set(0)
         
-    #     SmartDashboard.putNumber("Algae Pivot Position", self.getPivotPosition()/(2*pi))
 
 class FoldCommand(Command):
     def __init__(self, pivotMotor: SparkMax, pivotController:PID, pivotEncoder: SparkRelativeEncoder, pivotFF: ArmFeedforward, isOpening: bool):
@@ -108,18 +113,31 @@ class FoldCommand(Command):
         self.pivotFF = pivotFF
         self.pivotController = pivotController
         self.pivotEncoder = pivotEncoder
-        self.isOpening = isOpening
-        if self.isOpening:
-            self.pivotController.setSetpoint(sc.Algae.outPoint)
-        else:
-            self.pivotController.setSetpoint(sc.Algae.inPoint)
-    
+        self.position = STOWED
+
+        if self.position == STOWED:
+            self.pivotController.setSetpoint(sc.Algae.stowedPoint)
+        elif self.position == GROUNDPICKUP:
+            self.pivotController.setSetpoint(sc.Algae.groundPickupPoint)
+        elif self.position == CORALPICKUP:
+            self.pivotController.setSetpoint(sc.Algae.coralPickupPoint)
+
+    def modifySetPoint(self, amount: float):
+        self.pivotController.setSetpoint(self.pivotController.getSetpoint() + amount)
+
     def toggleInOut(self):
-        if self.isOpening:
-            self.pivotController.setSetpoint(sc.Algae.inPoint)
-        else:
-            self.pivotController.setSetpoint(sc.Algae.outPoint)
-        self.isOpening = not self.isOpening
+        if self.position == CORALPICKUP:
+            self.pivotController.setSetpoint(sc.Algae.stowedPoint)
+            self.position = STOWED
+            return
+        if self.position == STOWED:
+            self.pivotController.setSetpoint(sc.Algae.stowedPoint)
+        elif self.position == GROUNDPICKUP:
+            self.pivotController.setSetpoint(sc.Algae.groundPickupPoint)
+        self.position = (self.position + 1)%2
+    def toCoralPickup(self):
+        self.position = CORALPICKUP
+        self.pivotController.setSetpoint(sc.Algae.coralPickupPoint)
     def execute(self):
         angle = self.pivotEncoder.getPosition()*2*pi*sc.Algae.pivotGearRatio
         angularVelocity = self.pivotEncoder.getVelocity()*2*pi*sc.Algae.pivotGearRatio
