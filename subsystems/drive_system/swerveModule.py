@@ -36,8 +36,9 @@ class SwerveModule:
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
         self.drivingEncoder.setPosition(0.0)
         
-        self.drivingPIDController = PIDController(*c.drivingPID)
-        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(*c.drivingSVA)
+        # self.drivingPIDController = PIDController(*c.drivingPID)
+        # self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(*c.drivingSVA)
+        self.drivingController = self.drivingSparkMax.getClosedLoopController()
         
         
         # set up turning motor and encoder
