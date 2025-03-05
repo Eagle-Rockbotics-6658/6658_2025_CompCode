@@ -46,10 +46,14 @@ class SwerveModule:
         self.turningSparkMax.configure(c.turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.turningSparkMax.setInverted(reversedSteer)
         
-        self.turningEncoder = CANcoder(encoderNum)
+        # self.turningEncoder = CANcoder(encoderNum)
+        self.turningEncoder = self.turningSparkMax.getEncoder()
+        self.turningEncoder.setPosition(CANcoder(encoderNum).get_absolute_position())
         
-        self.turningPIDController = PIDController(*c.turningPID)
-        self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
+        self.turningController = self.turningSparkMax.getClosedLoopController()
+        
+        # self.turningPIDController = PIDController(*c.turningPID)
+        # self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         """_summary_
@@ -69,12 +73,12 @@ class SwerveModule:
         **Returns**:
             `Rotation2d`: Rotation of the module
         """
-        return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
+        return Rotation2d.fromRotations(self.turningEncoder.getPosition())
     
     def resetEncoders(self) -> None:
         """Resets the rotation and driving encoders to 0"""
         self.drivingEncoder.setPosition(0.0)
-        self.turningEncoder.set_position(0.0)
+        self.turningEncoder.setPosition(0.0)
                 
     def getState(self) -> SwerveModuleState:
         """Get current state of the module
@@ -102,12 +106,13 @@ class SwerveModule:
         desiredState.optimize(self.getCurrentRotation())
         
         # turning
-        self.turningSparkMax.set(
-            -self.turningPIDController.calculate(
-                self.getCurrentRotation().radians(), 
-                desiredState.angle.radians()
-            )
-        )
+        # self.turningSparkMax.set(
+        #     -self.turningPIDController.calculate(
+        #         self.getCurrentRotation().radians(), 
+        #         desiredState.angle.radians()
+        #     )
+        # )
+        self.turningController.setReference(desiredState.angle.radians(), SparkMax.ControlType.kPosition)
 
         # self.drivingSparkMax.set(0)
         # self.drivingSparkMax.set(

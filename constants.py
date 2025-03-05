@@ -7,14 +7,10 @@ from math import pi
 from wpilib import SmartDashboard
 
 class SwerveModuleConstants():
-    drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
+    wheelDiameter = .09
+    drivingPosFactor = (wheelDiameter * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
-    
-    drivingMotorConfig = SparkMaxConfig()
-    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
-    drivingMotorConfig.setIdleMode(drivingIdleMode)
-    drivingMotorConfig.smartCurrentLimit(50)
     
     drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
     drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
@@ -22,21 +18,28 @@ class SwerveModuleConstants():
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
+    drivingMotorConfig = SparkMaxConfig()
+    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
+    drivingMotorConfig.setIdleMode(drivingIdleMode)
+    drivingMotorConfig.smartCurrentLimit(50)
     drivingMotorConfig.closedLoop.pidf(*drivingPIDF)
     
     
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    turningMotorConfig = SparkMaxConfig()
-    turningMotorConfig.smartCurrentLimit(50)
-    turningMotorConfig.setIdleMode(turningIdleMode)
+    turningPosFactor = 1/6.75
     
     turningPID = (1, 0, 0.000)
-    wheelDiameter = .09
-
+    
     turnEncoderMin = 0.0
     turnEncoderMax = 2 * pi
     
+    turningMotorConfig = SparkMaxConfig()
+    turningMotorConfig.smartCurrentLimit(50)
+    turningMotorConfig.setIdleMode(turningIdleMode)
+    turningMotorConfig.encoder.positionConversionFactor(2*pi*turningPosFactor)
+    turningMotorConfig.closedLoop.pid(1, 0, 0.000).positionWrappingEnabled(True).positionWrappingInputRange(turnEncoderMin, turnEncoderMax)
+        
 class DriveConstants():
     deadband = 0.07
     FLDrivingCAN = 4
