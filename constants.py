@@ -18,11 +18,11 @@ class SwerveModuleConstants():
     
     drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
     drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
-    drivingPIDF
+    drivingPIDF = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6)
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     
-    drivingMotorConfig.closedLoop.pidf(*drivingPID)
+    drivingMotorConfig.closedLoop.pidf(*drivingPIDF)
     
     
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
