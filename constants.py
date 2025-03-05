@@ -12,33 +12,50 @@ class SwerveModuleConstants():
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     drivingIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
-    drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
-    drivingPIDF = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6)
+    # drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
+    drivingPIDF = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6)      # ff = 1/917??
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
+    drivingMaxAcceleration = 5.0        # in meters/min per second
+    drivingAllowedClosedLoopError = .2  # in meters
     
     drivingMotorConfig = SparkMaxConfig()
-    drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
-    drivingMotorConfig.setIdleMode(drivingIdleMode)
-    drivingMotorConfig.smartCurrentLimit(50)
-    drivingMotorConfig.closedLoop.pidf(*drivingPIDF)
+    drivingMotorConfig.encoder\
+        .positionConversionFactor(drivingPosFactor)\
+            .velocityConversionFactor(drivingVelFactor)\
+                .uvwMeasurementPeriod(16)
+    drivingMotorConfig.setIdleMode(drivingIdleMode).smartCurrentLimit(50)
+    drivingMotorConfig.closedLoop.pidf(*drivingPIDF).outputRange(drivingMinOutput, drivingMaxOutput)
+    drivingMotorConfig.closedLoop.maxMotion\
+        .maxAcceleration(drivingMaxAcceleration)\
+            .allowedClosedLoopError(drivingAllowedClosedLoopError)
     
     
+    turningPosFactor = 2*pi*1/6.75
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
     
-    turningPosFactor = 1/6.75
-    
     turningPID = (1, 0, 0.000)
+    turningMinOutput = -1.0
+    turningMaxOutput = 1.0
+    turningMaxVelocity = 2.0 * 60       # in radians/min
+    turningMaxAcceleration = 2.0 * 60   # in radians/min per second
+    turningAllowedError = 0             # in radians
     
     turnEncoderMin = 0.0
     turnEncoderMax = 2 * pi
     
     turningMotorConfig = SparkMaxConfig()
-    turningMotorConfig.smartCurrentLimit(50)
-    turningMotorConfig.setIdleMode(turningIdleMode)
-    turningMotorConfig.encoder.positionConversionFactor(2*pi*turningPosFactor)
-    turningMotorConfig.closedLoop.pid(1, 0, 0.000).positionWrappingEnabled(True).positionWrappingInputRange(turnEncoderMin, turnEncoderMax)
+    turningMotorConfig.setIdleMode(turningIdleMode).smartCurrentLimit(50)
+    turningMotorConfig.encoder.positionConversionFactor(2*pi*turningPosFactor).uvwMeasurementPeriod(16)
+    turningMotorConfig.closedLoop\
+        .pid(1, 0, 0.000)\
+            .positionWrappingEnabled(True)\
+                .positionWrappingInputRange(turnEncoderMin, turnEncoderMax)\
+                    .outputRange(turningMinOutput, turningMaxOutput)
+    turningMotorConfig.closedLoop.maxMotion\
+        .maxVelocity(turningMaxVelocity)\
+            .maxAcceleration(turningMaxAcceleration)\
+                .allowedClosedLoopError(turningAllowedError)
         
 class DriveConstants():
     deadband = 0.07

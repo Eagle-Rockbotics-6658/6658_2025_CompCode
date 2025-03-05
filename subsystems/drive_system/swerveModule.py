@@ -2,10 +2,8 @@ from rev import SparkMax, SparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.units import volts
 from wpilib import RobotController
 
 class SwerveModule:
@@ -28,7 +26,7 @@ class SwerveModule:
     """
     def __init__(self, drivingCANId: int, turningCANId: int, encoderNum: int, reversedDrive: bool, reversedSteer: bool) -> None:
         
-        # set up driving motor and encoder
+        # set up driving motor, encoder, and controller
         self.drivingSparkMax = SparkMax(drivingCANId, SparkLowLevel.MotorType.kBrushless)
         self.drivingSparkMax.configure(c.drivingMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.drivingSparkMax.setInverted(reversedDrive)
@@ -36,24 +34,18 @@ class SwerveModule:
         self.drivingEncoder = self.drivingSparkMax.getEncoder()
         self.drivingEncoder.setPosition(0.0)
         
-        # self.drivingPIDController = PIDController(*c.drivingPID)
-        # self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(*c.drivingSVA)
         self.drivingController = self.drivingSparkMax.getClosedLoopController()
         
         
-        # set up turning motor and encoder
+        # set up turning motor, encoder, and controller
         self.turningSparkMax = SparkMax(turningCANId, SparkLowLevel.MotorType.kBrushless)
         self.turningSparkMax.configure(c.turningMotorConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters)
         self.turningSparkMax.setInverted(reversedSteer)
         
-        # self.turningEncoder = CANcoder(encoderNum)
         self.turningEncoder = self.turningSparkMax.getEncoder()
         self.turningEncoder.setPosition(CANcoder(encoderNum).get_absolute_position())
         
         self.turningController = self.turningSparkMax.getClosedLoopController()
-        
-        # self.turningPIDController = PIDController(*c.turningPID)
-        # self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
                 
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         """_summary_
@@ -104,22 +96,5 @@ class SwerveModule:
             `desiredState` (SwerveModuleState): The desired state of the module
         """
         desiredState.optimize(self.getCurrentRotation())
-        
-        # turning
-        # self.turningSparkMax.set(
-        #     -self.turningPIDController.calculate(
-        #         self.getCurrentRotation().radians(), 
-        #         desiredState.angle.radians()
-        #     )
-        # )
-        self.turningController.setReference(desiredState.angle.radians(), SparkMax.ControlType.kPosition)
-
-        # self.drivingSparkMax.set(0)
-        # self.drivingSparkMax.set(
-        #     self.drivingPIDController.calculate(self.getState().speed, desiredState.speed) + 
-        #     self.drivingFeedForwardController.calculate(desiredState.speed)
-        # )
-        self.drivingController.setReference(
-            desiredState.speed / c.drivingPosFactor, 
-            SparkMax.ControlType.kVelocity
-        )
+        self.turningController.setReference(desiredState.angle.radians(), SparkMax.ControlType.kMAXMotionPositionControl)
+        self.drivingController.setReference(desiredState.speed / c.drivingPosFactor, SparkMax.ControlType.kMAXMotionVelocityControl)
