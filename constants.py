@@ -38,7 +38,7 @@ class SwerveModuleConstants():
     turningMinOutput = -1.0
     turningMaxOutput = 1.0
     turningMaxVelocity = 2.0 * 60       # in radians/min
-    turningMaxAcceleration = 2.0 * 60   # in radians/min per second
+    turningMaxAcceleration = 2.0        # in radians/min per second
     turningAllowedError = 0             # in radians
     
     turnEncoderMin = 0.0
