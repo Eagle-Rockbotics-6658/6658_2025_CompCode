@@ -207,6 +207,28 @@ class SwerveDrive(Subsystem):
         if len(self.controlArray) <= 100000:
             self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
+
+    def setModuleStatesPower(self, desiredStates: tuple[SwerveModuleState]) -> None:
+        """Sets the desired states of the swerve modules
+
+        **Args**:
+            `desiredStates` (tuple[SwerveModuleState]): a 4 tuple containing the SwerveModuleState for each module
+        """
+        desiredStates = c.kinematics.desaturateWheelSpeeds(desiredStates, c.MaxSpeed)
+        self.moduleFL.setDesiredStatePower(desiredStates[0])
+        self.moduleFR.setDesiredStatePower(desiredStates[1])
+        self.moduleRL.setDesiredStatePower(desiredStates[2])
+        self.moduleRR.setDesiredStatePower(desiredStates[3])
+        self.odometry.updateWithTime(
+            Timer.getTimestamp(),
+            self.getHeading(), 
+            (
+                self.moduleFL.getPosition(),
+                self.moduleFR.getPosition(),
+                self.moduleRL.getPosition(),
+                self.moduleRR.getPosition()
+            )
+        )
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using field relative speeds
@@ -216,7 +238,7 @@ class SwerveDrive(Subsystem):
         """
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
-        self.setModuleStates(moduleStates)
+        self.setModuleStatesPower(moduleStates)
             
     def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using robot relative speeds

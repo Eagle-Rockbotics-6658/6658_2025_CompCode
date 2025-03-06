@@ -22,14 +22,13 @@ class Robot(TimedCommandRobot):
 
     def _stopLogging(self):
         self.prof.disable()
-        self.timer.stop()
         s = io.StringIO()
         sortby = SortKey.CUMULATIVE
         ps = pstats.Stats(self.prof, stream=s).sort_stats(sortby)
         ps.print_stats()
-        out = s.getvalue()
-        self.dataLog.append(out)
-
+        self.out = s.getvalue()
+        self.dataLog.append(self.out)
+        SmartDashboard.putString("profile", self.out)
 
 
     def robotInit(self) -> None:
@@ -38,7 +37,7 @@ class Robot(TimedCommandRobot):
         self.autonomousCommand = None
         self.testCommand = None
         self.teleopInitCommand = None
-        self.timer = Timer()
+        self.out = ""
 
         self.joystick = Joystick(0)
 
@@ -46,9 +45,8 @@ class Robot(TimedCommandRobot):
         log = DataLogManager.getLog()
         self.dataLog = StringLogEntry(log, "/U/logs/profiler")
         
-        self.prof = cProfile.Profile(self.timer.get, 1)
+        self.prof = cProfile.Profile()
 
-        self.timer.start()
         self.prof.enable()
 
         # DataLogManager.start()
@@ -60,9 +58,10 @@ class Robot(TimedCommandRobot):
         
     def robotPeriodic(self):
         CommandScheduler.getInstance().run()
+        self.dataLog.append(self.out)
 
         if self.joystick.getRawButtonPressed(5):
-            self._stopLogging
+            self._stopLogging()
 
         # self.currentLogIndividuals.append(self.PDH.getAllCurrents())
         # self.currentLogAll.append(self.PDH.getTotalCurrent())

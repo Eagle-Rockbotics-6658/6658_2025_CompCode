@@ -113,3 +113,24 @@ class SwerveModule:
             self.drivingPIDController.calculate(self.getState().speed, desiredState.speed) + 
             self.drivingFeedForwardController.calculate(desiredState.speed)
         )
+
+    def setDesiredStatePower(self, desiredState: SwerveModuleState) -> None:
+        """Sets the state of the module
+
+        **Args**:
+            `desiredState` (SwerveModuleState): The desired state of the module
+        """
+        desiredState.optimize(self.getCurrentRotation())
+        
+        # turning
+        self.turningSparkMax.set(
+            -self.turningPIDController.calculate(
+                self.getCurrentRotation().radians(), 
+                desiredState.angle.radians()
+            )
+        )
+
+        # self.drivingSparkMax.set(0)
+        self.drivingSparkMax.set(
+            desiredState.speed
+        )
