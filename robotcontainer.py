@@ -1,6 +1,6 @@
 from subsystems.drive_system.swerveDrive import SwerveDrive
-from subsystems.coral import CoralMechanism
-from subsystems.algaeSubsystem import AlgaePivot, AlgaeIntake
+# from subsystems.coral import CoralMechanism
+# from subsystems.algaeSubsystem import AlgaePivot, AlgaeIntake
 from subsystems.climbSubsystem import ClimbSubsystem
 
 from constants import DriveConstants as d
@@ -25,7 +25,7 @@ from wpimath.geometry import Pose2d
 class RobotContainer:
     
     def __init__(self):
-        CS.launch("vision.py")
+        # CS.launch("vision.py")
 
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.driveStickID)
@@ -60,7 +60,7 @@ class RobotContainer:
         self.configureButtonBindings()
         self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))), self.drive))
         # self.algaeIntake.setDefaultCommand(run(lambda: self.algaeIntake.controlIntake(self.helperStick.getRawButton(5), self.helperStick.getRawButton(6)), self.algaeIntake))
-        self.climbMechanism.setDefaultCommand(run(lambda: self.climbMechanism.runMotors(-abs(self.helperStick.getRawAxis(1))), self.climbMechanism))
+        self.climbMechanism.setDefaultCommand(run(lambda: self.climbMechanism.runMotors(-abs(self.helperStick.getRawAxis(1)/4)), self.climbMechanism))
         # self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(self.helperStick.getRawAxis(5)), self.coralMechanism))
 
     def getPreTeleopCommand(self) -> Command:
@@ -69,6 +69,7 @@ class RobotContainer:
     def configureButtonBindings(self) -> None:
         # JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
+        JoystickButton(self.driveStick, 2).onTrue(runOnce(lambda: self.drive.resetPose(Pose2d()), self.drive))
         # JoystickButton(self.helperStick, 4).onTrue(runOnce(self.algaePivot.toggleExtended, self.algaePivot))
         # JoystickButton(self.driveStick, 7).onTrue(runOnce(self.drive.
         # tryToLimelight, self.drive))

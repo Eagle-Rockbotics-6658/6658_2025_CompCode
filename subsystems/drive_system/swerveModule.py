@@ -7,6 +7,7 @@ from constants import SwerveModuleConstants as c
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.units import volts
 from wpilib import RobotController
+from wpilib import SmartDashboard
 
 class SwerveModule:
     r"""
