@@ -14,7 +14,7 @@ class SwerveModuleConstants():
     drivingMotorConfig = SparkMaxConfig()
     drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
-    drivingMotorConfig.smartCurrentLimit(50)
+    drivingMotorConfig.smartCurrentLimit(20)
     
     drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
     drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
