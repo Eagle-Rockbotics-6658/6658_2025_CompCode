@@ -14,7 +14,7 @@ class SwerveModuleConstants():
     drivingMotorConfig = SparkMaxConfig()
     drivingMotorConfig.encoder.positionConversionFactor(drivingPosFactor).velocityConversionFactor(drivingVelFactor).uvwMeasurementPeriod(16)
     drivingMotorConfig.setIdleMode(drivingIdleMode)
-    drivingMotorConfig.smartCurrentLimit(50)
+    drivingMotorConfig.smartCurrentLimit(20)
     
     drivingPID = (0.048519 * (180/pi) * 2.0 * 0.0254, 0, .016)
     drivingSVA = (0.164, 0.12592 * (180/pi) * 2.0 * 0.0254 * 6, 0.16283 * (180/pi) * 2.0 * 0.0254 * 4)
@@ -25,7 +25,7 @@ class SwerveModuleConstants():
     turningIdleMode = SparkMaxConfig.IdleMode.kBrake
     
     turningMotorConfig = SparkMaxConfig()
-    turningMotorConfig.smartCurrentLimit(50)
+    turningMotorConfig.smartCurrentLimit(20)
     turningMotorConfig.setIdleMode(turningIdleMode)
     
     turningPID = (1, 0, 0.000)
@@ -35,7 +35,7 @@ class SwerveModuleConstants():
     turnEncoderMax = 2 * pi
     
 class DriveConstants():
-    deadband = 0.07
+    deadband = 0.1
     FLDrivingCAN = 4
     FRDrivingCAN = 8
     RLDrivingCAN = 2
@@ -53,8 +53,8 @@ class DriveConstants():
 
     PigeonGyro = 14
     
-    halfTrackWidth = inchesToMeters(24)/2
-    halfWheelBase = inchesToMeters(24)/2
+    halfTrackWidth = inchesToMeters(24.75)/2
+    halfWheelBase = inchesToMeters(24.75)/2
     
     kinematics = SwerveDrive4Kinematics(
         Translation2d(halfWheelBase, halfTrackWidth),
@@ -121,7 +121,7 @@ class SubsystemConstants():
     class Climb:
         leftMotorId = 15
         rightMotorId = 17
-        motorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kCoast)
+        motorConfig = SparkMaxConfig().setIdleMode(SparkMaxConfig.IdleMode.kBrake).smartCurrentLimit(60)
 
         encoderId = 0
         cutoff = 34

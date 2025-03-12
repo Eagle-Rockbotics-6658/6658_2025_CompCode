@@ -19,6 +19,7 @@ from wpimath.units import degreesToRadians
 from commands2.command import Command
 from wpilib import SmartDashboard
 from wpilib import Timer
+from wpilib import PowerDistribution
 
 from commands2 import Subsystem
 from typing import Callable
@@ -47,10 +48,6 @@ class SwerveDrive(Subsystem):
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, True, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, True, False)
-
-        #
-        self.lastDesiredSpeedFL = 0
-        self.controlArray = []
         
         self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
         
@@ -74,6 +71,7 @@ class SwerveDrive(Subsystem):
         # store this in your Constants file
         config = RobotConfig.fromGUISettings()
 
+
         AutoBuilder.configure(
             self.getPose,
             self.resetPose,
@@ -90,21 +88,21 @@ class SwerveDrive(Subsystem):
         
         self.pathFindingConstraints = PathConstraints(3.0, 5.0, degreesToRadians(540), degreesToRadians(720))
 
-        self.limelight = LimeLight()
-        self.limelight.sendRobotOrientationCommand(self.gyro).schedule()
+        # self.limelight = LimeLight()
+        # self.limelight.sendRobotOrientationCommand(self.gyro).schedule()
     
     def periodic(self):
-        if DriverStation.isTeleop():
-            poseAndLatency = self.limelight.getRobotPoseAndLatency()
-            if poseAndLatency != None:
-                self.odometry.addVisionMeasurement(poseAndLatency[0], Timer.getTimestamp() - (poseAndLatency[1] / 1000))
+        # if DriverStation.isTeleop():
+        #     poseAndLatency = self.limelight.getRobotPoseAndLatency()
+        #     if poseAndLatency != None:
+        #         self.odometry.addVisionMeasurement(poseAndLatency[0], Timer.getTimestamp() - (poseAndLatency[1] / 1000))
         # SmartDashboard.putNumberArray("turning current", [self.moduleFL.turningSparkMax.getOutputCurrent(), self.moduleFR.turningSparkMax.getOutputCurrent(), self.moduleRL.turningSparkMax.getOutputCurrent(), self.moduleRR.turningSparkMax.getOutputCurrent()])
         return super().periodic()
     
-    def resetOdometryToLimelight(self):
-        pose = self.limelight.getRobotPose()
-        if pose != None:
-            self.odometry.resetPose(pose)
+    # def resetOdometryToLimelight(self):
+    #     pose = self.limelight.getRobotPose()
+    #     if pose != None:
+    #         self.odometry.resetPose(pose)
         
     def _shouldFlipPath(self):
         # Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -115,12 +113,12 @@ class SwerveDrive(Subsystem):
     def _publishStates(self) -> None:
         """Publishes the estimated robot state to the driverstation"""
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
-        self.ObservedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Observed", SwerveModuleState).publish() #observed
-        self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Desired", SwerveModuleState).publish() #predicted
+        self.ObservedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Observed", SwerveModuleState).publish()
+        self.DesiredPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Desired", SwerveModuleState).publish()
 
     def _updateStates(self, desiredStates: tuple[SwerveModuleState]) -> None:
-        self.ObservedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
+        self.ObservedPublisher.set(self.getModuleStates())
         self.DesiredPublisher.set(desiredStates)
 
     def getHeading(self) -> Rotation2d:
@@ -204,9 +202,6 @@ class SwerveDrive(Subsystem):
             )
         )
         self._updateStates(desiredStates)
-        if len(self.controlArray) <= 100000:
-            self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
-        self.lastDesiredSpeedFL = desiredStates[0].speed
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds) -> None:
         """Drives the robot using field relative speeds
