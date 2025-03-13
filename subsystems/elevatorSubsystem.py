@@ -5,11 +5,32 @@ from wpimath.controller import PIDController
 from enum import Enum
 
 class ElevatorPositions(Enum):
-    TIER1 = (1, 0)
-    TIER2 = (2, 25)
-    INTAKE = (3, 30)
-    TIER3 = (4, 50)
-    TIER4 = (5, 75)
+    TIER1 = 1, 0
+    TIER2 = 2, 25
+    INTAKE = 3, 30
+    TIER3 = 4, 50
+    TIER4 = 5, 75
+
+    def __new__(cls, value, position):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.position = position
+        return obj
+
+    def up(self):
+        position = self.value
+        position += 1
+        if position > 5:
+            return ElevatorPositions.TIER4
+        print(ElevatorPositions(position))
+        return ElevatorPositions(position)
+
+    def down(self):
+        position = self.value
+        position -= 1
+        if position < 1:
+            return ElevatorPositions.TIER1
+        return ElevatorPositions(position)
     
 class Elevator(Subsystem):
     def __init__(self):
@@ -23,7 +44,10 @@ class Elevator(Subsystem):
         super().__init__()
     
     def getPosition(self) -> float:
-        return self.elevatorEncoder.getPosition() 
+        return self.elevatorEncoder.getPosition()
+    
+    def runElevator(self):
+        self.elevatorPositionSet(self.state.position)
     
     def elevatorPositionSet(self, desiredPosition: float):
         if desiredPosition > sc.Elevator.elevatorMax: 
@@ -31,9 +55,15 @@ class Elevator(Subsystem):
         if desiredPosition < sc.Elevator.elevatorMin:
             desiredPosition = sc.Elevator.elevatorMin
         self.elevatorMotor.set(self.elevatorPID.calculate(self.getPosition(), desiredPosition) + sc.Elevator.elevatorFF)
-    def setState(self, goUp: bool, goDown: bool):
-        if goUp: 
-            self.state.value[0] += 1
-        elif goDown:
-            self.state.value[0] -= 1
-        self.elevatorPositionSet(self.state.value[1])
+    
+    # def setState(self, goUp: bool, goDown: bool):
+    #     if goUp: 
+    #         self.state = self.state.up()
+    #     elif goDown:
+    #         self.state = self.state.down()
+    
+    def stateDown(self):
+        self.state = self.state.down()
+    
+    def stateUp(self):
+        self.state = self.state.up()
