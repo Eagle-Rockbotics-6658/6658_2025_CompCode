@@ -52,17 +52,19 @@ class RobotContainer:
 
         # NamedCommands.registerCommand("Algae Intake Off", run(lambda: self.algaeIntake._runIntake(0), self.algaeIntake))
         # NamedCommands.registerCommand("Algae Pivot Off", run(lambda: self.algaePivot.pivotMotor.set(0), self.algaePivot))
-        NamedCommands.registerCommand("Climb Off", run(self.climbMechanism.runMotors(0)))
+        # NamedCommands.registerCommand("Climb Off", run(self.climbMechanism.runMotors(0)))
 
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
         self.configureButtonBindings()
-        self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))), self.drive))
+        # self.drive.setDefaultCommand(run(lambda: self.drive.driveFieldRelative((ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))), self.drive))
         # self.algaeIntake.setDefaultCommand(run(lambda: self.algaeIntake.controlIntake(self.helperStick.getRawButton(5), self.helperStick.getRawButton(6)), self.algaeIntake))
         self.climbMechanism.setDefaultCommand(run(lambda: self.climbMechanism.runMotors(-abs(self.helperStick.getRawAxis(1)/4)), self.climbMechanism))
         # self.coralMechanism.setDefaultCommand(run(lambda: self.coralMechanism.setIntakeSpeed(self.helperStick.getRawAxis(5)), self.coralMechanism))
+        self.elevator.setDefaultCommand(run(self.elevator.runElevator, self.elevator))
+        # self.elevator.setDefaultCommand(run(lambda: self.elevator.run(self.driveStick.getRawAxis(1)), self.elevator))
 
     def getPreTeleopCommand(self) -> Command:
         return runOnce(self.climbMechanism.resetEncoders, self.climbMechanism)
@@ -71,6 +73,8 @@ class RobotContainer:
         # JoystickButton(self.driveStick, 3).whileTrue(run(self.drive.setX, self.drive))
         JoystickButton(self.driveStick, 1).onTrue(runOnce(self.drive.zeroHeading, self.drive))
         JoystickButton(self.driveStick, 2).onTrue(runOnce(lambda: self.drive.resetPose(Pose2d()), self.drive))
+        JoystickButton(self.driveStick, 4).onTrue(runOnce(self.elevator.resetEncoder, self.elevator))
+        JoystickButton(self.driveStick, 3).onTrue(runOnce(self.elevator.toggleElevatorPosition, self.elevator))
         # JoystickButton(self.helperStick, 4).onTrue(runOnce(self.algaePivot.toggleExtended, self.algaePivot))
         # JoystickButton(self.driveStick, 7).onTrue(runOnce(self.drive.
         # tryToLimelight, self.drive))
